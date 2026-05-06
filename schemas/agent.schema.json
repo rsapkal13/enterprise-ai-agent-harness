@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-ai-agent-harness.org/schemas/agent.schema.json",
+  "title": "Agent",
+  "description": "An AI actor with business identity, technical identity, and allowed capabilities.",
+  "type": "object",
+  "required": ["id", "version", "status", "name", "description", "owner", "allowedSkills", "channels"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable agent identifier."
+    },
+    "version": {
+      "type": "string",
+      "description": "Specification version of this agent definition."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "retired"],
+      "description": "Lifecycle status for this agent."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable agent name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Business purpose of the agent."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Owning team or accountable group."
+    },
+    "technicalIdentity": {
+      "type": "object",
+      "description": "Provider-neutral technical identity metadata.",
+      "additionalProperties": true
+    },
+    "allowedSkills": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Skill identifiers this agent may request."
+    },
+    "channels": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Channels where the agent may operate."
+    },
+    "contextScopes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Context scope identifiers this agent may request."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Search and classification tags."
+    }
+  }
+}

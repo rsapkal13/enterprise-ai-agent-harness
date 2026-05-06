@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-ai-agent-harness.org/schemas/context.schema.json",
+  "title": "Context Scope",
+  "description": "A named context boundary that agents or skills may request.",
+  "type": "object",
+  "required": ["id", "version", "status", "name", "description", "owner", "dataClassification"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable context scope identifier."
+    },
+    "version": {
+      "type": "string",
+      "description": "Specification version of this context definition."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "retired"],
+      "description": "Lifecycle status for this context scope."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable context scope name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Public-safe description of the context available through this scope."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Owning team or accountable group."
+    },
+    "dataClassification": {
+      "type": "string",
+      "enum": ["public", "internal", "confidential", "restricted"],
+      "description": "Highest expected data classification available through the scope."
+    },
+    "allowedPurpose": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Permitted business purposes for this context scope."
+    },
+    "sourceSystems": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "System identifiers that may provide this context."
+    }
+  }
+}

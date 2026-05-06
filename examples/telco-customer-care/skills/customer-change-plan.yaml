@@ -1,0 +1,28 @@
+id: customer.change_plan
+version: 0.1.0
+status: active
+name: Change Customer Plan
+description: Helps an authorized service agent move a fictional customer to a different plan.
+owner: customer-care-platform
+riskLevel: high
+allowedAgents:
+  - customer-service-agent
+tools:
+  - eligibility.check_plan_change
+  - billing.calculate_price_delta
+  - order.submit_plan_change
+policies:
+  - consent.required
+  - high_risk.action
+contextScopes:
+  - customer.summary
+  - account.entitlements
+  - active.case
+workflow: customer.change_plan.workflow
+evaluations:
+  - plan_change_completed
+  - price_delta_explained
+  - policy_compliance
+tags:
+  - fictional
+  - account-change

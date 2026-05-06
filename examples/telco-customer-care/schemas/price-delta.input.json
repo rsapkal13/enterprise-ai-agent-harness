@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Price Delta Input",
+  "type": "object",
+  "required": ["currentPlanId", "requestedPlanId"],
+  "properties": {
+    "currentPlanId": {
+      "type": "string",
+      "description": "Fictional current plan identifier."
+    },
+    "requestedPlanId": {
+      "type": "string",
+      "description": "Fictional target plan identifier."
+    }
+  }
+}

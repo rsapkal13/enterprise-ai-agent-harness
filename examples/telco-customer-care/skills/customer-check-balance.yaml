@@ -1,0 +1,21 @@
+id: customer.check_balance
+version: 0.1.0
+status: draft
+name: Check Customer Balance
+description: Provides a fictional summary of a customer's current account balance.
+owner: customer-care-platform
+riskLevel: low
+allowedAgents:
+  - customer-service-agent
+tools:
+  - billing.calculate_price_delta
+policies:
+  - consent.required
+contextScopes:
+  - customer.summary
+evaluations:
+  - balance_lookup_completed
+  - policy_compliance
+tags:
+  - fictional
+  - read-only

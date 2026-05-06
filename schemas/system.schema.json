@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-ai-agent-harness.org/schemas/system.schema.json",
+  "title": "System",
+  "description": "A registered enterprise system, service, platform, data source, or mock boundary used by governed tools.",
+  "type": "object",
+  "required": ["id", "version", "status", "name", "description", "owner", "systemType", "trustLevel", "dataClassification"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable system identifier."
+    },
+    "version": {
+      "type": "string",
+      "description": "Specification version of this system definition."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "retired"],
+      "description": "Lifecycle status for this system."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable system name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Public-safe description of the system boundary."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Owning team or accountable group."
+    },
+    "systemType": {
+      "type": "string",
+      "enum": ["crm", "billing", "order_management", "identity", "case_management", "knowledge", "workflow", "data", "mock", "other"],
+      "description": "System category."
+    },
+    "trustLevel": {
+      "type": "string",
+      "enum": ["trusted_internal", "controlled_external", "mock", "unknown"],
+      "description": "Trust boundary used by policy and audit controls."
+    },
+    "dataClassification": {
+      "type": "string",
+      "enum": ["public", "internal", "confidential", "restricted"],
+      "description": "Highest expected data classification for the system."
+    },
+    "integrationTypes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["rest", "mcp", "event", "workflow", "data", "mock"]
+      },
+      "description": "Supported integration styles."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Search and classification tags."
+    }
+  }
+}

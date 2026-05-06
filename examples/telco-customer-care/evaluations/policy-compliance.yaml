@@ -1,0 +1,8 @@
+id: policy_compliance
+version: 0.1.0
+status: active
+name: Policy Compliance
+description: Checks whether required policies produced audit evidence before tool execution.
+targetType: journey
+metricType: compliance
+successCriteria: Consent and high-risk policy decisions are present before order submission.

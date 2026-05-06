@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-ai-agent-harness.org/schemas/audit-event.schema.json",
+  "title": "Audit Event",
+  "description": "Structured evidence for a governed AI execution event.",
+  "type": "object",
+  "required": ["id", "version", "timestamp", "eventType", "actor", "outcome"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable audit event identifier."
+    },
+    "version": {
+      "type": "string",
+      "description": "Specification version of this audit event."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Event timestamp in ISO 8601 format."
+    },
+    "traceId": {
+      "type": "string",
+      "description": "Trace identifier linking related events."
+    },
+    "eventType": {
+      "type": "string",
+      "enum": ["agent_request", "skill_selected", "policy_decision", "tool_call", "workflow_state", "system_interaction", "approval", "outcome", "evaluation"],
+      "description": "Type of audit event."
+    },
+    "actor": {
+      "type": "object",
+      "description": "Actor responsible for or associated with the event.",
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["agent", "user", "system", "policy_engine", "workflow_engine"]
+        },
+        "id": { "type": "string" }
+      }
+    },
+    "references": {
+      "type": "object",
+      "description": "Related registry object identifiers.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["started", "allowed", "denied", "requires_action", "completed", "failed"],
+      "description": "Event outcome."
+    },
+    "evidence": {
+      "type": "object",
+      "description": "Public-safe evidence metadata for the event.",
+      "additionalProperties": true
+    }
+  }
+}

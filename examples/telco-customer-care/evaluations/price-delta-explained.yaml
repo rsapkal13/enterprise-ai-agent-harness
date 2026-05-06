@@ -1,0 +1,8 @@
+id: price_delta_explained
+version: 0.1.0
+status: active
+name: Price Delta Explained
+description: Checks whether a fictional before-and-after price comparison was available before confirmation.
+targetType: skill
+metricType: quality
+successCriteria: Confirmation surface includes current plan, proposed plan, and monthly price delta fields.

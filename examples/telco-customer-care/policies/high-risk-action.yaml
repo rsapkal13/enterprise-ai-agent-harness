@@ -1,0 +1,44 @@
+id: high_risk.action
+version: 0.1.0
+status: active
+name: High Risk Action Control
+description: Requires additional checks for high-risk customer account changes.
+enforcementPoint: tool_call
+decisionType: require_approval
+appliesTo:
+  - risk.high
+subject:
+  types:
+    - agent
+  allowedIds:
+    - customer-service-agent
+resource:
+  types:
+    - skill
+    - tool
+  riskLevels:
+    - high
+actions:
+  - invoke
+  - submit
+conditions:
+  - field: resource.riskLevel
+    operator: equals
+    value: high
+auditRequired: true
+evidence:
+  - agent_identity
+  - customer_context_summary
+  - proposed_action_summary
+obligations:
+  - id: capture_policy_reason
+    type: audit
+    description: Capture the policy reason and evidence used for the decision.
+  - id: pause_for_review_when_threshold_exceeded
+    type: approval
+    description: Pause for review when the configured risk threshold is exceeded.
+decisionExplanation:
+  requiredFields:
+    - risk_level
+    - approval_required
+    - decision_reason

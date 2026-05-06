@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-ai-agent-harness.org/schemas/evaluation.schema.json",
+  "title": "Evaluation",
+  "description": "A metric, check, or result used to assess AI capability quality and governance.",
+  "type": "object",
+  "required": ["id", "version", "status", "name", "description", "targetType", "metricType"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable evaluation identifier."
+    },
+    "version": {
+      "type": "string",
+      "description": "Specification version of this evaluation definition."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "retired"],
+      "description": "Lifecycle status for this evaluation."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable evaluation name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Evaluation purpose."
+    },
+    "targetType": {
+      "type": "string",
+      "enum": ["agent", "skill", "tool", "workflow", "policy", "journey"],
+      "description": "Object type this evaluation applies to."
+    },
+    "metricType": {
+      "type": "string",
+      "enum": ["completion", "compliance", "quality", "latency", "reliability", "business_outcome"],
+      "description": "Metric category."
+    },
+    "successCriteria": {
+      "type": "string",
+      "description": "Human-readable success criteria."
+    }
+  }
+}

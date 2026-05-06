@@ -1,0 +1,21 @@
+id: customer.replace_sim
+version: 0.1.0
+status: draft
+name: Replace SIM
+description: Supports a fictional SIM replacement journey with additional risk controls.
+owner: customer-care-platform
+riskLevel: high
+allowedAgents:
+  - customer-service-agent
+tools: []
+policies:
+  - consent.required
+  - high_risk.action
+contextScopes:
+  - customer.summary
+  - active.case
+evaluations:
+  - replacement_request_triaged
+tags:
+  - fictional
+  - account-security

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-ai-agent-harness.org/schemas/workflow.schema.json",
+  "title": "Workflow",
+  "description": "A stateful journey coordinating skills, tools, policies, approvals, and outcomes.",
+  "type": "object",
+  "required": ["id", "version", "status", "name", "description", "steps"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable workflow identifier."
+    },
+    "version": {
+      "type": "string",
+      "description": "Specification version of this workflow definition."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "retired"],
+      "description": "Lifecycle status for this workflow."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable workflow name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Business purpose of the workflow."
+    },
+    "steps": {
+      "type": "array",
+      "description": "Ordered workflow steps.",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "name"],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable workflow step identifier."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["policy", "tool", "approval", "decision", "completion"]
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable workflow step name."
+          },
+          "policy": {
+            "type": "string",
+            "description": "Required for policy steps. References a registered policy."
+          },
+          "tool": {
+            "type": "string",
+            "description": "Required for tool steps. References a registered tool."
+          },
+          "uiManifest": {
+            "type": "string",
+            "description": "Optional UI manifest used by approval, review, or confirmation steps."
+          },
+          "input": {
+            "type": "object",
+            "description": "Declarative input mapping for this step.",
+            "additionalProperties": true
+          },
+          "output": {
+            "type": "object",
+            "description": "Declarative output mapping for this step.",
+            "additionalProperties": true
+          },
+          "onSuccess": {
+            "type": "string",
+            "description": "Next step identifier when this step succeeds."
+          },
+          "onFailure": {
+            "type": "string",
+            "description": "Next step identifier when this step fails."
+          },
+          "failureBehavior": {
+            "type": "string",
+            "enum": ["fail_workflow", "retry", "compensate", "manual_review", "continue"],
+            "description": "Expected behavior when this step fails."
+          },
+          "approval": {
+            "type": "object",
+            "description": "Approval requirements for approval steps.",
+            "additionalProperties": true,
+            "properties": {
+              "required": {
+                "type": "boolean",
+                "description": "Whether approval is required."
+              },
+              "approverRole": {
+                "type": "string",
+                "description": "Role expected to approve the step."
+              },
+              "evidence": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Evidence fields required before approval."
+              }
+            }
+          },
+          "compensation": {
+            "type": "object",
+            "description": "Compensation guidance if this step must be reversed.",
+            "additionalProperties": true,
+            "properties": {
+              "strategy": {
+                "type": "string",
+                "enum": ["none", "manual_review", "tool", "workflow"]
+              },
+              "tool": {
+                "type": "string",
+                "description": "Optional tool used for compensation."
+              },
+              "workflow": {
+                "type": "string",
+                "description": "Optional workflow used for compensation."
+              }
+            }
+          }
+        }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "description": "Rollback or compensation guidance for failed or reversed journeys.",
+      "additionalProperties": true
+    },
+    "evaluations": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Evaluation identifiers associated with the workflow."
+    }
+  }
+}

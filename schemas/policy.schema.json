@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-ai-agent-harness.org/schemas/policy.schema.json",
+  "title": "Policy",
+  "description": "A governance rule or decision contract evaluated before or during execution.",
+  "type": "object",
+  "required": ["id", "version", "status", "name", "description", "enforcementPoint", "decisionType", "appliesTo"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable policy identifier."
+    },
+    "version": {
+      "type": "string",
+      "description": "Specification version of this policy definition."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "retired"],
+      "description": "Lifecycle status for this policy."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable policy name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Policy purpose and control intent."
+    },
+    "enforcementPoint": {
+      "type": "string",
+      "enum": ["agent_request", "skill_invocation", "tool_call", "workflow_step", "context_access", "system_interaction"],
+      "description": "Where in the execution chain this policy is evaluated."
+    },
+    "decisionType": {
+      "type": "string",
+      "enum": ["allow", "deny", "require_approval", "require_consent"],
+      "description": "Primary decision outcome the policy can produce."
+    },
+    "appliesTo": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Skills, tools, workflows, or risk classes the policy applies to."
+    },
+    "subject": {
+      "type": "object",
+      "description": "Actor or identity constraints for the policy.",
+      "additionalProperties": true,
+      "properties": {
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["agent", "user", "service_identity", "system"]
+          },
+          "description": "Subject types covered by this policy."
+        },
+        "allowedIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional explicit subject identifiers."
+        }
+      }
+    },
+    "resource": {
+      "type": "object",
+      "description": "Resource constraints for the policy.",
+      "additionalProperties": true,
+      "properties": {
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["skill", "tool", "workflow", "system", "context_scope", "ui_manifest"]
+          },
+          "description": "Resource types covered by this policy."
+        },
+        "ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional explicit resource identifiers."
+        },
+        "riskLevels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "restricted"]
+          },
+          "description": "Risk levels covered by this policy."
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["read", "invoke", "approve", "write", "submit", "evaluate", "access_context"]
+      },
+      "description": "Action types governed by this policy."
+    },
+    "conditions": {
+      "type": "array",
+      "description": "Portable condition descriptors. These are intentionally declarative and not a runtime expression language.",
+      "items": {
+        "type": "object",
+        "required": ["field", "operator", "value"],
+        "additionalProperties": true,
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Context, subject, resource, action, or risk field evaluated by the condition."
+          },
+          "operator": {
+            "type": "string",
+            "enum": ["equals", "not_equals", "in", "not_in", "exists", "missing", "greater_than", "less_than"]
+          },
+          "value": {
+            "description": "Expected comparison value for the condition."
+          }
+        }
+      }
+    },
+    "auditRequired": {
+      "type": "boolean",
+      "description": "Whether policy decisions must be audited."
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Evidence fields required to explain or prove the decision."
+    },
+    "obligations": {
+      "type": "array",
+      "description": "Actions required when this policy is triggered.",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "description"],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable obligation identifier."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["audit", "consent", "approval", "notification", "redaction", "step_up_authentication"],
+            "description": "Obligation category."
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable obligation description."
+          }
+        }
+      }
+    },
+    "decisionExplanation": {
+      "type": "object",
+      "description": "Expected explanation fields for audit and review.",
+      "additionalProperties": true,
+      "properties": {
+        "requiredFields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Fields expected in the policy decision explanation."
+        }
+      }
+    }
+  }
+}

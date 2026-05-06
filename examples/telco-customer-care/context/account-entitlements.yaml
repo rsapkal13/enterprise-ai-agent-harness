@@ -1,0 +1,15 @@
+id: account.entitlements
+version: 0.1.0
+status: active
+name: Account Entitlements
+description: Fictional account entitlement context used for eligibility decisions.
+owner: customer-care-platform
+dataClassification: confidential
+allowedPurpose:
+  - customer-care
+  - plan-change
+sourceSystems:
+  - mock.eligibility-system
+tags:
+  - fictional
+  - eligibility

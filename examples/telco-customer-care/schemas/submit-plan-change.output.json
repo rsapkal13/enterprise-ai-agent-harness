@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Submit Plan Change Output",
+  "type": "object",
+  "required": ["orderReference", "status"],
+  "properties": {
+    "orderReference": {
+      "type": "string",
+      "description": "Fictional order reference."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["accepted", "rejected", "pending_review"],
+      "description": "Fictional order status."
+    }
+  }
+}

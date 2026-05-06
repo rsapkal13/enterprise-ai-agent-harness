@@ -1,13 +1,26 @@
-# Node
+# Dependencies
 node_modules/
-# Python
-__pycache__/
-*.py[cod]
+
+# Build output
+dist/
+build/
+coverage/
+
 # Logs
 logs/
 *.log
-# Generated files
-*.pyc
-# OS files
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS and editor files
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
+
+# Python cache used by lightweight validation scripts
+__pycache__/
+*.py[cod]

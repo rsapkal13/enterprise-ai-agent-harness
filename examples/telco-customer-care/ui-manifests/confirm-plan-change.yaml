@@ -1,0 +1,22 @@
+id: confirm-plan-change
+version: 0.1.0
+status: active
+name: Confirm Plan Change
+journeyId: customer.change_plan.workflow
+surfaces:
+  - id: customer_confirmation
+    type: confirmation
+    title: Confirm requested plan change
+    fields:
+      - current_plan
+      - proposed_plan
+      - monthly_price_delta
+      - consent_statement
+      - effective_date
+  - id: agent_review
+    type: review
+    title: Review policy and eligibility results
+    fields:
+      - eligibility_status
+      - policy_decisions
+      - audit_reference

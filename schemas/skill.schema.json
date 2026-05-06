@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-ai-agent-harness.org/schemas/skill.schema.json",
+  "title": "Skill",
+  "description": "A governed business capability that an agent can execute.",
+  "type": "object",
+  "required": ["id", "version", "status", "name", "description", "owner", "riskLevel", "tools", "policies"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable skill identifier, such as customer.change_plan."
+    },
+    "version": {
+      "type": "string",
+      "description": "Specification version of this skill definition."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "retired"],
+      "description": "Lifecycle status for this skill."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable skill name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Business description of the capability."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Owning team or accountable group."
+    },
+    "riskLevel": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "restricted"],
+      "description": "Risk classification used by governance controls."
+    },
+    "allowedAgents": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Agents allowed to request this skill."
+    },
+    "tools": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tool identifiers this skill may use."
+    },
+    "policies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Policy identifiers that must be evaluated."
+    },
+    "contextScopes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Context scope identifiers requested by this skill."
+    },
+    "evaluations": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Evaluation metrics or checks associated with the skill."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Search and classification tags."
+    }
+  }
+}

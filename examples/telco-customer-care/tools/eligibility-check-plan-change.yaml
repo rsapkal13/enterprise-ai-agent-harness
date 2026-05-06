@@ -1,0 +1,16 @@
+id: eligibility.check_plan_change
+version: 0.1.0
+status: active
+name: Check Plan Change Eligibility
+description: Determines whether a fictional customer account is eligible for a requested plan change.
+adapter: mock
+riskLevel: medium
+systemId: mock.eligibility-system
+sideEffect: read
+dataClassification: confidential
+inputSchema: schemas/plan-change-eligibility.input.json
+outputSchema: schemas/plan-change-eligibility.output.json
+auditRequired: true
+tags:
+  - fictional
+  - eligibility

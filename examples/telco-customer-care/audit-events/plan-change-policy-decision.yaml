@@ -1,0 +1,18 @@
+id: audit.telco.plan-change.policy-decision.example
+version: 0.1.0
+timestamp: "2026-01-01T00:00:00Z"
+traceId: trace.telco.plan-change.example
+eventType: policy_decision
+actor:
+  type: policy_engine
+  id: local-policy-engine
+references:
+  agentId: customer-service-agent
+  skillId: customer.change_plan
+  policyId: consent.required
+  workflowId: customer.change_plan.workflow
+outcome: requires_action
+evidence:
+  consent_required: true
+  consent_statement_version: fictional-v1
+  note: Example event only; no real customer data.

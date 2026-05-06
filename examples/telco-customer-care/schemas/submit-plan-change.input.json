@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Submit Plan Change Input",
+  "type": "object",
+  "required": ["accountReference", "requestedPlanId", "consentReference"],
+  "properties": {
+    "accountReference": {
+      "type": "string",
+      "description": "Fictional account reference."
+    },
+    "requestedPlanId": {
+      "type": "string",
+      "description": "Fictional target plan identifier."
+    },
+    "consentReference": {
+      "type": "string",
+      "description": "Fictional consent evidence reference."
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Plan Change Eligibility Output",
+  "type": "object",
+  "required": ["eligible", "reason"],
+  "properties": {
+    "eligible": {
+      "type": "boolean",
+      "description": "Whether the fictional account is eligible."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Public-safe explanation for the eligibility result."
+    }
+  }
+}

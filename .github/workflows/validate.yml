@@ -1,0 +1,56 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          failed = False
+          for path in Path(".").rglob("*.json"):
+              if ".git" in path.parts:
+                  continue
+              try:
+                  json.loads(path.read_text(encoding="utf-8"))
+              except Exception as exc:
+                  failed = True
+                  print(f"{path}: {exc}")
+
+          if failed:
+              raise SystemExit(1)
+          PY
+
+      - name: Check Markdown formatting basics
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          failed = False
+          for path in Path(".").rglob("*.md"):
+              if ".git" in path.parts:
+                  continue
+              text = path.read_text(encoding="utf-8")
+              if not text.endswith("\n"):
+                  failed = True
+                  print(f"{path}: missing trailing newline")
+              for index, line in enumerate(text.splitlines(), start=1):
+                  if line.rstrip(" ") != line:
+                      failed = True
+                      print(f"{path}:{index}: trailing spaces")
+
+          if failed:
+              raise SystemExit(1)
+          PY

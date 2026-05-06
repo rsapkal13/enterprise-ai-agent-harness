@@ -1,0 +1,14 @@
+id: active.case
+version: 0.1.0
+status: active
+name: Active Case
+description: Fictional service case context for the current assisted interaction.
+owner: customer-care-platform
+dataClassification: internal
+allowedPurpose:
+  - customer-care
+sourceSystems:
+  - mock.order-system
+tags:
+  - fictional
+  - case-management

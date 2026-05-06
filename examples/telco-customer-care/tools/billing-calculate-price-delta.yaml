@@ -1,0 +1,16 @@
+id: billing.calculate_price_delta
+version: 0.1.0
+status: active
+name: Calculate Price Delta
+description: Calculates a fictional before-and-after price comparison for a plan change.
+adapter: mock
+riskLevel: medium
+systemId: mock.billing-system
+sideEffect: read
+dataClassification: confidential
+inputSchema: schemas/price-delta.input.json
+outputSchema: schemas/price-delta.output.json
+auditRequired: true
+tags:
+  - fictional
+  - billing

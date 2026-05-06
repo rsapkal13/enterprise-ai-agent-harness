@@ -1,0 +1,15 @@
+id: customer.summary
+version: 0.1.0
+status: active
+name: Customer Summary
+description: Fictional summary context for customer-care interactions.
+owner: customer-care-platform
+dataClassification: confidential
+allowedPurpose:
+  - customer-care
+  - account-support
+sourceSystems:
+  - mock.billing-system
+tags:
+  - fictional
+  - customer-context

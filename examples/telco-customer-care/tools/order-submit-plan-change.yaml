@@ -1,0 +1,16 @@
+id: order.submit_plan_change
+version: 0.1.0
+status: active
+name: Submit Plan Change Order
+description: Submits a fictional plan-change order after consent and confirmation.
+adapter: mock
+riskLevel: high
+systemId: mock.order-system
+sideEffect: workflow
+dataClassification: confidential
+inputSchema: schemas/submit-plan-change.input.json
+outputSchema: schemas/submit-plan-change.output.json
+auditRequired: true
+tags:
+  - fictional
+  - order-management

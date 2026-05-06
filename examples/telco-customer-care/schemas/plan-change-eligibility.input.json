@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Plan Change Eligibility Input",
+  "type": "object",
+  "required": ["accountReference", "requestedPlanId"],
+  "properties": {
+    "accountReference": {
+      "type": "string",
+      "description": "Fictional account reference used by the mock example."
+    },
+    "requestedPlanId": {
+      "type": "string",
+      "description": "Fictional target plan identifier."
+    }
+  }
+}

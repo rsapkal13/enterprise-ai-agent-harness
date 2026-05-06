@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-ai-agent-harness.org/schemas/ui-manifest.schema.json",
+  "title": "UI Manifest",
+  "description": "A portable description of user-facing surfaces required by an AI journey.",
+  "type": "object",
+  "required": ["id", "version", "status", "name", "journeyId", "surfaces"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable UI manifest identifier."
+    },
+    "version": {
+      "type": "string",
+      "description": "Specification version of this UI manifest."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "retired"],
+      "description": "Lifecycle status for this UI manifest."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable manifest name."
+    },
+    "journeyId": {
+      "type": "string",
+      "description": "Workflow or journey identifier this manifest supports."
+    },
+    "surfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "title"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["confirmation", "approval", "status", "review"]
+          },
+          "title": { "type": "string" },
+          "fields": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

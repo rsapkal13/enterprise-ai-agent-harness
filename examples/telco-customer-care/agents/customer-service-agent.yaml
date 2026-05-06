@@ -1,0 +1,24 @@
+id: customer-service-agent
+version: 0.1.0
+status: active
+name: Customer Service Agent
+description: Fictional customer-care agent for assisted service journeys.
+owner: customer-care-platform
+technicalIdentity:
+  type: service_identity
+  reference: CUSTOMER_SERVICE_AGENT_IDENTITY
+allowedSkills:
+  - customer.check_balance
+  - customer.change_plan
+  - customer.replace_sim
+channels:
+  - web
+  - contact-center
+  - chat
+contextScopes:
+  - customer.summary
+  - account.entitlements
+  - active.case
+tags:
+  - fictional
+  - customer-care

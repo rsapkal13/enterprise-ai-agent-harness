@@ -1,0 +1,39 @@
+id: customer.change_plan.workflow
+version: 0.1.0
+status: active
+name: Customer Plan Change Workflow
+description: Fictional workflow for changing a customer plan with policy checks and confirmation.
+steps:
+  - id: confirm_consent
+    type: policy
+    name: Confirm customer consent
+    policy: consent.required
+  - id: check_eligibility
+    type: tool
+    name: Check plan eligibility
+    tool: eligibility.check_plan_change
+  - id: calculate_delta
+    type: tool
+    name: Calculate price delta
+    tool: billing.calculate_price_delta
+  - id: review_high_risk
+    type: policy
+    name: Review high-risk action controls
+    policy: high_risk.action
+  - id: present_confirmation
+    type: approval
+    name: Present plan change confirmation
+    uiManifest: confirm-plan-change
+  - id: submit_order
+    type: tool
+    name: Submit plan change order
+    tool: order.submit_plan_change
+  - id: complete
+    type: completion
+    name: Complete plan change journey
+rollback:
+  strategy: manual_review
+  description: Future runtimes should define compensation steps for submitted orders.
+evaluations:
+  - plan_change_completed
+  - policy_compliance

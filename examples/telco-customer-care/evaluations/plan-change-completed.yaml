@@ -1,0 +1,8 @@
+id: plan_change_completed
+version: 0.1.0
+status: active
+name: Plan Change Completed
+description: Checks whether the fictional plan-change journey reached a completed outcome.
+targetType: workflow
+metricType: completion
+successCriteria: Workflow reaches the completion step after required policy and confirmation steps.

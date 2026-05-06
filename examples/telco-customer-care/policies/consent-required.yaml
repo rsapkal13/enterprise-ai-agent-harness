@@ -1,0 +1,46 @@
+id: consent.required
+version: 0.1.0
+status: active
+name: Consent Required
+description: Requires customer consent before account-affecting actions proceed.
+enforcementPoint: skill_invocation
+decisionType: require_consent
+appliesTo:
+  - customer.change_plan
+  - customer.replace_sim
+subject:
+  types:
+    - agent
+  allowedIds:
+    - customer-service-agent
+resource:
+  types:
+    - skill
+  ids:
+    - customer.change_plan
+    - customer.replace_sim
+  riskLevels:
+    - high
+actions:
+  - invoke
+conditions:
+  - field: context.consent.present
+    operator: not_equals
+    value: true
+auditRequired: true
+evidence:
+  - consent_timestamp
+  - consent_channel
+  - consent_statement_version
+obligations:
+  - id: record_consent_evidence
+    type: consent
+    description: Record consent timestamp, channel, and statement version.
+  - id: include_consent_in_audit_event
+    type: audit
+    description: Include consent evidence in the resulting audit event.
+decisionExplanation:
+  requiredFields:
+    - consent_status
+    - consent_statement_version
+    - decision_reason
