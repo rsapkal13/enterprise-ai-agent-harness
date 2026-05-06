@@ -1,0 +1,13 @@
+# Node
+node_modules/
+# Python
+__pycache__/
+*.py[cod]
+# Logs
+logs/
+*.log
+# Generated files
+*.pyc
+# OS files
+.DS_Store
+Thumbs.db
