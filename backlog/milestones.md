@@ -33,5 +33,17 @@
 ## v0.5 - Demo Experiences
 
 - Demo runner
-- Admin console prototype
 - Documentation site
+- Control plane dashboard phases A and B: static registry browser, policy inspector, audit trail viewer
+
+## v0.6 - Runtime-Connected Dashboard
+
+- Journey monitor connected to local runtime (phase C)
+- Evaluation console (phase D)
+- Trace-linked audit events
+
+## v0.7 - Approval Queue
+
+- Human-in-the-loop approval queue in the dashboard (phase E)
+- Approval write model via policy engine API
+- Approval audit log

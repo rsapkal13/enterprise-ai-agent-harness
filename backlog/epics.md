@@ -27,3 +27,13 @@ Capture traces, audit logs, evaluation results, and improvement signals.
 ## Epic 7: Demo Experiences
 
 Build a documentation website, admin console prototype, and demo runner.
+
+## Epic 8: Control Plane Dashboard
+
+Build the operator-facing console for inspecting registries, policy decisions, journey execution,
+audit trails, and evaluation outcomes. Phases A–B are static (local files). Phases C–D connect to
+the local runtime. Phase E adds the human-in-the-loop approval queue.
+
+See [`backlog/control-plane-dashboard.md`](control-plane-dashboard.md) for the full story backlog
+and [`docs/architecture/control-plane-dashboard.md`](../docs/architecture/control-plane-dashboard.md)
+for the design rationale.
