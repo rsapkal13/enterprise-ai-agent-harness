@@ -331,6 +331,56 @@ High-priority next tasks:
 6. Convert v0.1 backlog stories into GitHub issues if not already complete.
 7. Add architecture diagrams and approval workflow diagram.
 8. Add public glossary.
+9. Align the public website with v0.1 scope and future-state roadmap.
+10. Convert website-alignment and future-state backlog stories into GitHub issues.
+
+## Website Alignment Notes
+
+The website repository reviewed during the project setup was:
+
+```text
+https://github.com/SappyEnterprises/enterprise-ai-harness.git
+```
+
+The website direction is mostly aligned with AgentHarness, especially:
+
+- One control plane, two surfaces
+- Business portal plus open-source engineering codebase
+- Core operating model
+- Risk tiers
+- Approval workflow
+
+Website content that should be treated as current v0.1:
+
+- Public specification framing
+- Core capabilities
+- Risk tiers
+- Approval workflow
+- Repository docs, schemas, examples, validation, and backlog
+- Fictional telco customer-care journey
+
+Website content that should be treated as future roadmap unless implemented:
+
+- CLI scaffolding commands
+- Docker, Helm, and deployment guidance
+- Runtime SDK package publishing
+- Runtime-connected dashboard
+- Human approval queue
+- Agent mesh, agent directory, and agent-to-agent delegation
+
+New backlog files capture these future-state areas:
+
+- `backlog/website-alignment.md`
+- `backlog/runtime-cli-packaging-deployment.md`
+- `backlog/agent-directory-and-delegation.md`
+
+Guidance for website updates:
+
+- Keep `v0.1` clearly described as a specification release.
+- Do not present runtime, deployment, or agent-directory features as available unless the repo has
+  implemented them.
+- If the website has useful future-state ideas, keep them as roadmap language and make sure matching
+  repo backlog items exist.
 
 ## Suggested Commit Messages Used Recently
 

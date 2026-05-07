@@ -117,6 +117,15 @@ The current release focuses on:
 
 Runtime implementation is intentionally out of scope for v0.1. The TypeScript files in `packages/` are placeholders that describe package boundaries and future contracts.
 
+## Future Product Direction
+
+The long-term product direction includes a business-facing control plane portal, local runtime
+preview, human approval operations, runtime-connected dashboard views, package publishing strategy,
+deployment guidance, and controlled agent directory/delegation.
+
+These are roadmap items, not v0.1 runtime capabilities. Public website and documentation copy should
+separate what exists in the current spec release from future-state capabilities.
+
 ## Repository Layout
 
 ```text

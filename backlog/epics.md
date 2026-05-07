@@ -37,3 +37,35 @@ the local runtime. Phase E adds the human-in-the-loop approval queue.
 See [`backlog/control-plane-dashboard.md`](control-plane-dashboard.md) for the full story backlog
 and [`docs/architecture/control-plane-dashboard.md`](../docs/architecture/control-plane-dashboard.md)
 for the design rationale.
+
+## Epic 9: Website Alignment
+
+Keep the public website aligned with the repository's current release state and future roadmap.
+
+The website may describe the long-term control-plane vision, but it must clearly separate:
+
+- Available in `v0.1`
+- Planned for local runtime releases
+- Planned for dashboard and approval operations
+- Future-state ideas that are not yet committed runtime capabilities
+
+See [`backlog/website-alignment.md`](website-alignment.md).
+
+## Epic 10: Runtime CLI, Packaging, and Deployment Strategy
+
+Define the future developer experience for validation, manifest scaffolding, local runtime preview,
+package publishing, and deployment guidance.
+
+This epic captures website ideas such as CLI commands, package names, Docker, and Helm as future
+work rather than current product capability.
+
+See [`backlog/runtime-cli-packaging-deployment.md`](runtime-cli-packaging-deployment.md).
+
+## Epic 11: Agent Directory and Controlled Delegation
+
+Define the future agent directory and controlled handoff model.
+
+This is the repo home for future-state ideas such as capability cards, allow-listed discovery,
+policy-gated delegation, and audited agent-to-agent collaboration. It is not part of `v0.1`.
+
+See [`backlog/agent-directory-and-delegation.md`](agent-directory-and-delegation.md).

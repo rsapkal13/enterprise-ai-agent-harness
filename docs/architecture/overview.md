@@ -114,5 +114,24 @@ AgentHarness is designed for incremental adoption.
 - v0.3: policy decisions, approval checkpoints, and workflow state
 - v0.4: observability, audit, evaluation, and local reporting
 - v0.5: demo experiences, admin-console direction, and additional journeys
+- v0.6: runtime-connected dashboard and package strategy
+- v0.7: human approval operations and recertification workflows
+- v0.8: agent directory and controlled delegation
 
 Organisations can start by using the schemas and examples to describe capabilities before adopting runtime enforcement.
+
+## Future-State Capabilities
+
+Some product ideas belong in the long-term control-plane vision but are not part of the `v0.1`
+specification release.
+
+Future-state areas include:
+
+- A business-facing portal for registration, approval, certification, monitoring, and retirement.
+- CLI support for validation, local fixture loading, and future manifest scaffolding.
+- Runtime SDK packages once package names and boundaries are stable.
+- Deployment guidance after local runtime behaviour is proven.
+- Agent directory and controlled delegation for allow-listed agent collaboration.
+
+These should be introduced through roadmap and backlog items before they are described as available
+website or runtime features.
