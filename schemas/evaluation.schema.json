@@ -2,45 +2,89 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://enterprise-ai-agent-harness.org/schemas/evaluation.schema.json",
   "title": "Evaluation",
-  "description": "A metric, check, or result used to assess AI capability quality and governance.",
+  "description": "Defines evaluation packs, scenarios, golden outcomes, trajectory expectations, pass thresholds, risk applicability, and certification status.",
   "type": "object",
-  "required": ["id", "version", "status", "name", "description", "targetType", "metricType"],
-  "additionalProperties": true,
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "name",
+    "description",
+    "owner",
+    "lifecycle_state",
+    "target_type",
+    "scenarios",
+    "pass_threshold"
+  ],
   "properties": {
-    "id": {
+    "id": { "type": "string", "description": "Stable evaluation or evaluation pack identifier." },
+    "version": { "type": "string", "description": "Version of this evaluation definition." },
+    "name": { "type": "string", "description": "Human-readable evaluation name." },
+    "description": { "type": "string", "description": "Evaluation purpose." },
+    "owner": { "type": "string", "description": "Accountable owner or owning group." },
+    "lifecycle_state": {
       "type": "string",
-      "description": "Stable evaluation identifier."
+      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
     },
-    "version": {
+    "target_type": {
       "type": "string",
-      "description": "Specification version of this evaluation definition."
+      "enum": ["agent", "skill", "policy", "tool", "workflow", "system", "journey"],
+      "description": "Object type being evaluated."
     },
-    "status": {
-      "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"],
-      "description": "Lifecycle status for this evaluation."
+    "target_refs": {
+      "type": "array",
+      "description": "Object IDs this evaluation applies to.",
+      "items": { "type": "string" }
     },
-    "name": {
-      "type": "string",
-      "description": "Human-readable evaluation name."
+    "applicable_risk_tiers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["T0", "T1", "T2", "T3"]
+      }
     },
-    "description": {
-      "type": "string",
-      "description": "Evaluation purpose."
+    "scenarios": {
+      "type": "array",
+      "description": "Evaluation scenarios.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description"],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "inputs_ref": { "type": "string" },
+          "golden_outcome": {
+            "type": "object",
+            "description": "Expected outcome or assertion summary.",
+            "additionalProperties": true
+          },
+          "trajectory_expectations": {
+            "type": "array",
+            "description": "Expected tool, policy, workflow, or audit path assertions.",
+            "items": { "type": "string" }
+          }
+        }
+      }
     },
-    "targetType": {
-      "type": "string",
-      "enum": ["agent", "skill", "tool", "workflow", "policy", "journey"],
-      "description": "Object type this evaluation applies to."
+    "pass_threshold": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Minimum passing score from 0 to 1."
     },
-    "metricType": {
+    "certification_status": {
       "type": "string",
-      "enum": ["completion", "compliance", "quality", "latency", "reliability", "business_outcome"],
-      "description": "Metric category."
+      "enum": ["not_started", "in_progress", "passed", "failed", "expired", "waived"],
+      "description": "Certification status for this evaluation."
     },
-    "successCriteria": {
-      "type": "string",
-      "description": "Human-readable success criteria."
+    "audit_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
     }
   }
 }

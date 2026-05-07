@@ -2,61 +2,93 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://enterprise-ai-agent-harness.org/schemas/audit-event.schema.json",
   "title": "Audit Event",
-  "description": "Structured evidence for a governed AI execution event.",
+  "description": "Defines structural audit evidence for governed AI execution.",
   "type": "object",
-  "required": ["id", "version", "timestamp", "eventType", "actor", "outcome"],
-  "additionalProperties": true,
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "version",
+    "timestamp",
+    "trace_id",
+    "event_type",
+    "requester",
+    "outcome"
+  ],
   "properties": {
-    "id": {
-      "type": "string",
-      "description": "Stable audit event identifier."
-    },
-    "version": {
-      "type": "string",
-      "description": "Specification version of this audit event."
-    },
+    "event_id": { "type": "string", "description": "Stable audit event identifier." },
+    "version": { "type": "string", "description": "Version of this audit event shape." },
     "timestamp": {
       "type": "string",
       "format": "date-time",
       "description": "Event timestamp in ISO 8601 format."
     },
-    "traceId": {
+    "trace_id": {
       "type": "string",
-      "description": "Trace identifier linking related events."
+      "description": "Correlation ID linking this event to a full journey trace."
     },
-    "eventType": {
+    "event_type": {
       "type": "string",
-      "enum": ["agent_request", "skill_selected", "policy_decision", "tool_call", "workflow_state", "system_interaction", "approval", "outcome", "evaluation"],
-      "description": "Type of audit event."
+      "enum": ["agent_request", "skill_selected", "policy_decision", "context_access", "tool_call", "workflow_state", "system_interaction", "approval", "outcome", "evaluation", "kill_switch"],
+      "description": "Type of audit evidence."
     },
-    "actor": {
+    "requester": {
       "type": "object",
-      "description": "Actor responsible for or associated with the event.",
+      "description": "Requester or actor associated with the event.",
+      "additionalProperties": false,
       "required": ["type", "id"],
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["agent", "user", "system", "policy_engine", "workflow_engine"]
+          "enum": ["agent", "user", "system", "policy_engine", "workflow_engine", "tool_gateway", "evaluator"]
         },
         "id": { "type": "string" }
       }
     },
-    "references": {
-      "type": "object",
-      "description": "Related registry object identifiers.",
-      "additionalProperties": {
-        "type": "string"
-      }
+    "agent_id": { "type": "string", "description": "Agent ID related to the event." },
+    "skill_id": { "type": "string", "description": "Skill ID related to the event." },
+    "policy_id": { "type": "string", "description": "Policy ID related to the event." },
+    "tool_id": { "type": "string", "description": "Tool ID related to the event." },
+    "workflow_id": { "type": "string", "description": "Workflow ID related to the event." },
+    "system_id": { "type": "string", "description": "System ID related to the event." },
+    "context_scope_id": { "type": "string", "description": "Context scope ID related to the event." },
+    "evaluation_id": { "type": "string", "description": "Evaluation ID related to the event." },
+    "policy_decision": {
+      "type": "string",
+      "enum": ["allow", "deny", "require_approval"],
+      "description": "Policy decision associated with the event."
+    },
+    "side_effects": {
+      "type": "string",
+      "enum": ["read_only", "reversible_write", "irreversible_write"],
+      "description": "Side-effect category associated with the event."
+    },
+    "data_classes": {
+      "type": "array",
+      "description": "Data classes involved in the event.",
+      "items": { "type": "string" }
     },
     "outcome": {
       "type": "string",
-      "enum": ["started", "allowed", "denied", "requires_action", "completed", "failed"],
-      "description": "Event outcome."
+      "enum": ["started", "allowed", "denied", "requires_action", "completed", "failed", "blocked"],
+      "description": "Outcome of the audited event."
     },
     "evidence": {
       "type": "object",
-      "description": "Public-safe evidence metadata for the event.",
+      "description": "Public-safe evidence metadata. Avoid raw sensitive data.",
       "additionalProperties": true
+    },
+    "kill_switch": {
+      "type": "object",
+      "description": "Kill-switch evidence when a capability is blocked or disabled.",
+      "additionalProperties": false,
+      "properties": {
+        "activated": { "type": "boolean" },
+        "reason": { "type": "string" },
+        "affected_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
     }
   }
 }

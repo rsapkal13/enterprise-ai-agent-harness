@@ -2,51 +2,94 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://enterprise-ai-agent-harness.org/schemas/ui-manifest.schema.json",
   "title": "UI Manifest",
-  "description": "A portable description of user-facing surfaces required by an AI journey.",
+  "description": "Defines approved UI and channel behaviour, components, confirmations, disclosures, and human approval prompts for agent-led journeys.",
   "type": "object",
-  "required": ["id", "version", "status", "name", "journeyId", "surfaces"],
-  "additionalProperties": true,
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "name",
+    "owner",
+    "lifecycle_state",
+    "journey_ref",
+    "channels",
+    "components"
+  ],
   "properties": {
-    "id": {
+    "id": { "type": "string", "description": "Stable UI manifest identifier." },
+    "version": { "type": "string", "description": "Version of this UI manifest." },
+    "name": { "type": "string", "description": "Human-readable manifest name." },
+    "description": { "type": "string", "description": "Purpose of this UI manifest." },
+    "owner": { "type": "string", "description": "Accountable owner or owning group." },
+    "lifecycle_state": {
       "type": "string",
-      "description": "Stable UI manifest identifier."
+      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
     },
-    "version": {
+    "environment": {
       "type": "string",
-      "description": "Specification version of this UI manifest."
+      "enum": ["dev", "test", "staging", "prod"]
     },
-    "status": {
+    "journey_ref": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"],
-      "description": "Lifecycle status for this UI manifest."
+      "description": "Workflow or journey ID this manifest supports."
     },
-    "name": {
-      "type": "string",
-      "description": "Human-readable manifest name."
-    },
-    "journeyId": {
-      "type": "string",
-      "description": "Workflow or journey identifier this manifest supports."
-    },
-    "surfaces": {
+    "channels": {
       "type": "array",
+      "description": "Channels where this manifest may be used.",
+      "items": { "type": "string" }
+    },
+    "components": {
+      "type": "array",
+      "description": "Approved UI components or surfaces.",
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "required": ["id", "type", "title"],
-        "additionalProperties": true,
         "properties": {
           "id": { "type": "string" },
           "type": {
             "type": "string",
-            "enum": ["confirmation", "approval", "status", "review"]
+            "enum": ["confirmation", "approval", "status", "review", "disclosure", "input"]
           },
           "title": { "type": "string" },
           "fields": {
             "type": "array",
             "items": { "type": "string" }
-          }
+          },
+          "required": { "type": "boolean" }
         }
       }
+    },
+    "confirmation_steps": {
+      "type": "array",
+      "description": "Confirmation step IDs or descriptions required before execution.",
+      "items": { "type": "string" }
+    },
+    "disclosure_requirements": {
+      "type": "array",
+      "description": "Required disclosures for user-facing interactions.",
+      "items": { "type": "string" }
+    },
+    "human_approval_prompts": {
+      "type": "array",
+      "description": "Approved prompts or prompt references for human approval surfaces.",
+      "items": { "type": "string" }
+    },
+    "policy_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "evaluation_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
     }
   }
 }

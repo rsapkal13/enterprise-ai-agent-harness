@@ -2,23 +2,30 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://enterprise-ai-agent-harness.org/schemas/skill.schema.json",
   "title": "Skill",
-  "description": "A governed business capability that an agent can execute.",
+  "description": "Defines a reusable governed business capability that agents may request.",
   "type": "object",
-  "required": ["id", "version", "status", "name", "description", "owner", "riskLevel", "tools", "policies"],
-  "additionalProperties": true,
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "name",
+    "description",
+    "owner",
+    "risk_tier",
+    "lifecycle_state",
+    "input_contract",
+    "output_contract",
+    "tool_bindings",
+    "policies"
+  ],
   "properties": {
     "id": {
       "type": "string",
-      "description": "Stable skill identifier, such as customer.change_plan."
+      "description": "Stable skill identifier."
     },
     "version": {
       "type": "string",
-      "description": "Specification version of this skill definition."
-    },
-    "status": {
-      "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"],
-      "description": "Lifecycle status for this skill."
+      "description": "Version of this skill definition."
     },
     "name": {
       "type": "string",
@@ -30,42 +37,67 @@
     },
     "owner": {
       "type": "string",
-      "description": "Owning team or accountable group."
+      "description": "Accountable owner or owning group."
     },
-    "riskLevel": {
+    "risk_tier": {
       "type": "string",
-      "enum": ["low", "medium", "high", "restricted"],
-      "description": "Risk classification used by governance controls."
+      "enum": ["T0", "T1", "T2", "T3"],
+      "description": "Risk tier for this capability."
     },
-    "allowedAgents": {
-      "type": "array",
-      "items": { "type": "string" },
-      "description": "Agents allowed to request this skill."
+    "lifecycle_state": {
+      "type": "string",
+      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
     },
-    "tools": {
+    "environment": {
+      "type": "string",
+      "enum": ["dev", "test", "staging", "prod"]
+    },
+    "approved_agents": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "Tool identifiers this skill may use."
+      "description": "Agent IDs approved to request this skill.",
+      "items": { "type": "string" }
+    },
+    "input_contract": {
+      "type": "object",
+      "description": "Input contract reference or lightweight field list.",
+      "additionalProperties": true
+    },
+    "output_contract": {
+      "type": "object",
+      "description": "Output contract reference or lightweight field list.",
+      "additionalProperties": true
+    },
+    "required_context": {
+      "type": "array",
+      "description": "Context scope IDs required by the skill.",
+      "items": { "type": "string" }
+    },
+    "tool_bindings": {
+      "type": "array",
+      "description": "Tool IDs this skill may invoke.",
+      "items": { "type": "string" }
     },
     "policies": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "Policy identifiers that must be evaluated."
+      "description": "Policy IDs that apply to this skill.",
+      "items": { "type": "string" }
     },
-    "contextScopes": {
-      "type": "array",
-      "items": { "type": "string" },
-      "description": "Context scope identifiers requested by this skill."
+    "workflow_ref": {
+      "type": "string",
+      "description": "Workflow ID used for multi-step execution."
     },
-    "evaluations": {
+    "evaluation_refs": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "Evaluation metrics or checks associated with the skill."
+      "description": "Evaluation or evaluation pack IDs required for this skill.",
+      "items": { "type": "string" }
+    },
+    "audit_required": {
+      "type": "boolean",
+      "description": "Whether skill invocation must produce audit evidence."
     },
     "tags": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "Search and classification tags."
+      "items": { "type": "string" }
     }
   }
 }

@@ -2,71 +2,113 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://enterprise-ai-agent-harness.org/schemas/tool.schema.json",
   "title": "Tool",
-  "description": "A governed wrapper around an external action, lookup, or integration.",
+  "description": "Defines governed access to a system action, API, MCP tool, workflow command, or data access path.",
   "type": "object",
-  "required": ["id", "version", "status", "name", "description", "adapter", "riskLevel", "systemId"],
-  "additionalProperties": true,
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "name",
+    "description",
+    "owner",
+    "lifecycle_state",
+    "target_system",
+    "allowed_verbs",
+    "side_effects",
+    "auth_method",
+    "input_schema",
+    "output_schema",
+    "audit_logging"
+  ],
   "properties": {
-    "id": {
+    "id": { "type": "string", "description": "Stable tool identifier." },
+    "version": { "type": "string", "description": "Version of this tool definition." },
+    "name": { "type": "string", "description": "Human-readable tool name." },
+    "description": { "type": "string", "description": "Business-safe tool description." },
+    "owner": { "type": "string", "description": "Accountable owner or owning group." },
+    "risk_tier": {
       "type": "string",
-      "description": "Stable tool identifier."
+      "enum": ["T0", "T1", "T2", "T3"],
+      "description": "Risk tier for this tool."
     },
-    "version": {
+    "lifecycle_state": {
       "type": "string",
-      "description": "Specification version of this tool definition."
+      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
     },
-    "status": {
+    "environment": {
       "type": "string",
-      "enum": ["draft", "active", "deprecated", "retired"],
-      "description": "Lifecycle status for this tool."
+      "enum": ["dev", "test", "staging", "prod"]
     },
-    "name": {
+    "target_system": {
       "type": "string",
-      "description": "Human-readable tool name."
+      "description": "System ID this tool interacts with."
     },
-    "description": {
+    "adapter_type": {
       "type": "string",
-      "description": "Business-safe description of the tool."
+      "enum": ["rest", "mcp", "mock", "workflow", "data", "event"],
+      "description": "Adapter style used to execute the tool."
     },
-    "adapter": {
+    "allowed_verbs": {
+      "type": "array",
+      "description": "Allowed operation verbs or action names.",
+      "items": { "type": "string" }
+    },
+    "side_effects": {
       "type": "string",
-      "enum": ["rest", "mcp", "mock", "workflow", "data"],
-      "description": "Adapter category used to execute the tool."
+      "enum": ["read_only", "reversible_write", "irreversible_write"],
+      "description": "Side-effect category."
     },
-    "riskLevel": {
+    "auth_method": {
       "type": "string",
-      "enum": ["low", "medium", "high", "restricted"]
+      "description": "Provider-neutral authentication method or identity boundary."
     },
-    "systemId": {
+    "input_schema": {
       "type": "string",
-      "description": "Registered system this tool interacts with."
+      "description": "Input schema reference."
     },
-    "sideEffect": {
+    "output_schema": {
       "type": "string",
-      "enum": ["read", "write", "workflow", "external_notification"],
-      "description": "Side-effect category of the tool call."
+      "description": "Output schema reference."
     },
-    "dataClassification": {
-      "type": "string",
-      "enum": ["public", "internal", "confidential", "restricted"],
-      "description": "Highest expected data classification handled by this tool."
+    "data_classification": {
+      "type": "array",
+      "description": "Data classes this tool may handle.",
+      "items": { "type": "string" }
     },
-    "inputSchema": {
-      "type": "string",
-      "description": "Optional schema reference for tool input."
+    "rate_limits": {
+      "type": "object",
+      "description": "Declarative rate-limit expectations.",
+      "additionalProperties": true
     },
-    "outputSchema": {
-      "type": "string",
-      "description": "Optional schema reference for tool output."
-    },
-    "auditRequired": {
+    "approval_required": {
       "type": "boolean",
-      "description": "Whether tool calls must be written to the audit log."
+      "description": "Whether this tool requires approval before execution."
+    },
+    "policy_refs": {
+      "type": "array",
+      "description": "Policy IDs evaluated before or during tool execution.",
+      "items": { "type": "string" }
+    },
+    "audit_logging": {
+      "type": "object",
+      "description": "Audit logging requirements.",
+      "additionalProperties": false,
+      "required": ["required"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "event_types": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "evaluation_refs": {
+      "type": "array",
+      "items": { "type": "string" }
     },
     "tags": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "Search and classification tags."
+      "items": { "type": "string" }
     }
   }
 }

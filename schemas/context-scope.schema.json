@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enterprise-ai-agent-harness.org/schemas/context-scope.schema.json",
+  "title": "Context Scope",
+  "description": "Defines what context can be accessed, by whom, for what purpose, and under what constraints.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "name",
+    "description",
+    "owner",
+    "lifecycle_state",
+    "data_classification",
+    "allowed_purposes",
+    "source_systems"
+  ],
+  "properties": {
+    "id": { "type": "string", "description": "Stable context scope identifier." },
+    "version": { "type": "string", "description": "Version of this context scope definition." },
+    "name": { "type": "string", "description": "Human-readable context scope name." },
+    "description": { "type": "string", "description": "Public-safe description of the context boundary." },
+    "owner": { "type": "string", "description": "Accountable owner or owning group." },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["dev", "test", "staging", "prod"]
+    },
+    "data_classification": {
+      "type": "string",
+      "description": "Highest expected classification of context exposed through this scope."
+    },
+    "allowed_purposes": {
+      "type": "array",
+      "description": "Approved business purposes for this context.",
+      "items": { "type": "string" }
+    },
+    "allowed_agents": {
+      "type": "array",
+      "description": "Agent IDs allowed to request this scope when policy allows.",
+      "items": { "type": "string" }
+    },
+    "allowed_skills": {
+      "type": "array",
+      "description": "Skill IDs allowed to request this scope when policy allows.",
+      "items": { "type": "string" }
+    },
+    "source_systems": {
+      "type": "array",
+      "description": "System IDs that can provide this context.",
+      "items": { "type": "string" }
+    },
+    "constraints": {
+      "type": "object",
+      "description": "Access, retention, redaction, or purpose constraints.",
+      "additionalProperties": true
+    },
+    "consent_required": {
+      "type": "boolean",
+      "description": "Whether user or business consent is required before access."
+    },
+    "audit_required": {
+      "type": "boolean",
+      "description": "Whether context access must emit audit evidence."
+    },
+    "evaluation_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
