@@ -52,11 +52,15 @@ Controlled multi-step execution. Coordinates journeys with state, approvals, ret
 
 Safe access to enterprise context. Controls what business, user, session, memory, system, and entitlement context an agent can use during execution.
 
-### 7. Evaluation Service
+### 7. UI Manifest Registry
+
+Structured intent for agent-led screens. Declares the information, decisions, and actions a journey must surface to a human without coupling to a specific frontend framework. Manifests are registry objects — approved, versioned, and referenced by workflow steps.
+
+### 8. Evaluation Service
 
 Certification before production. Tests agent behaviour across scenarios, tool-use paths, policy boundaries, adversarial inputs, and regression cases before and after release.
 
-### 8. Observability and Audit
+### 9. Observability and Audit
 
 Proof of what happened. Captures traces, audit events, policy decisions, tool calls, approvals, outputs, side effects, cost, latency, and drift signals.
 
