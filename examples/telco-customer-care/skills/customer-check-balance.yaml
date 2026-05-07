@@ -1,21 +1,28 @@
 id: customer.check_balance
 version: 0.1.0
-status: draft
 name: Check Customer Balance
-description: Provides a fictional summary of a customer's current account balance.
+description: Read a fictional limited account balance summary for assisted service.
 owner: customer-care-platform
-riskLevel: low
-allowedAgents:
+risk_tier: T1
+lifecycle_state: draft
+environment: test
+approved_agents:
   - customer-service-agent
-tools:
-  - billing.calculate_price_delta
-policies:
-  - consent.required
-contextScopes:
+input_contract:
+  required_fields:
+    - customer_reference
+output_contract:
+  fields:
+    - balance_summary
+required_context:
   - customer.summary
-evaluations:
-  - balance_lookup_completed
-  - policy_compliance
+tool_bindings:
+  - customer.read_limited_profile
+policies:
+  - customer_data.access
+evaluation_refs:
+  - plan_change_eval_pack
+audit_required: true
 tags:
   - fictional
   - read-only

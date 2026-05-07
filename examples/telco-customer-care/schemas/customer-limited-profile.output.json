@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Limited Customer Profile Output",
+  "type": "object",
+  "required": ["profile_summary", "data_classification"],
+  "properties": {
+    "profile_summary": {
+      "type": "string",
+      "description": "Public-safe fictional summary."
+    },
+    "data_classification": {
+      "type": "string",
+      "description": "Classification of the returned fictional summary."
+    }
+  }
+}

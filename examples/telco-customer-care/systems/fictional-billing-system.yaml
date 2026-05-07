@@ -1,0 +1,23 @@
+id: fictional-billing-system
+version: 0.1.0
+name: Fictional Billing System
+description: Fictional billing boundary used to calculate a public-safe price delta.
+owner: billing-operations
+lifecycle_state: active
+trust_level: mock
+data_classifications:
+  - confidential
+interfaces:
+  - id: price-delta-read
+    type: mock
+    description: Mock interface for calculating a fictional price delta.
+environments:
+  - test
+operational_constraints:
+  availability_profile: example-only
+  real_system: false
+audit_refs:
+  - audit.telco.plan_change.allowed.example
+tags:
+  - fictional
+  - billing

@@ -1,0 +1,36 @@
+id: order.prepare_plan_change_request
+version: 0.1.0
+name: Prepare Plan Change Request
+description: Prepare a fictional plan-change request after confirmation and required approval.
+owner: order-operations
+risk_tier: T2
+lifecycle_state: active
+environment: test
+target_system: fictional-order-system
+adapter_type: mock
+allowed_verbs:
+  - prepare_change_request
+side_effects: reversible_write
+auth_method: scoped_workload_identity
+input_schema: schemas/prepare-plan-change-request.input.json
+output_schema: schemas/prepare-plan-change-request.output.json
+data_classification:
+  - confidential
+rate_limits:
+  window: minute
+  max_calls: 20
+approval_required: true
+policy_refs:
+  - consent.required
+  - high_risk.action
+audit_logging:
+  required: true
+  event_types:
+    - tool_call
+    - system_interaction
+    - approval
+evaluation_refs:
+  - plan_change_trajectory_checks
+tags:
+  - fictional
+  - order

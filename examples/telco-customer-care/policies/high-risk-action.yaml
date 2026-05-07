@@ -1,44 +1,45 @@
 id: high_risk.action
 version: 0.1.0
-status: active
 name: High Risk Action Control
-description: Requires additional checks for high-risk customer account changes.
-enforcementPoint: tool_call
-decisionType: require_approval
-appliesTo:
-  - risk.high
-subject:
-  types:
-    - agent
-  allowedIds:
+description: Require additional review for high-impact or elevated-risk customer-care actions.
+owner: ai-governance
+lifecycle_state: active
+environment: test
+scope:
+  agents:
     - customer-service-agent
-resource:
-  types:
-    - skill
-    - tool
-  riskLevels:
-    - high
-actions:
-  - invoke
-  - submit
-conditions:
-  - field: resource.riskLevel
+  skills:
+    - customer.change_plan
+    - customer.replace_sim
+  tools:
+    - order.prepare_plan_change_request
+  workflows:
+    - customer.change_plan.workflow
+  enforcement_points:
+    - tool_call
+    - workflow_step
+applicable_risk_tiers:
+  - T2
+  - T3
+default_decision: require_approval
+rules:
+  - id: bounded_t2_prepare_request_requires_review
+    description: T2 request preparation requires human approval before completion.
+    condition:
+      field: tool.side_effects
+      operator: equals
+      value: reversible_write
+    decision: require_approval
+approval_conditions:
+  - field: workflow.customer_confirmation.present
     operator: equals
-    value: high
-auditRequired: true
-evidence:
-  - agent_identity
-  - customer_context_summary
-  - proposed_action_summary
-obligations:
-  - id: capture_policy_reason
-    type: audit
-    description: Capture the policy reason and evidence used for the decision.
-  - id: pause_for_review_when_threshold_exceeded
-    type: approval
-    description: Pause for review when the configured risk threshold is exceeded.
-decisionExplanation:
-  requiredFields:
-    - risk_level
-    - approval_required
-    - decision_reason
+    value: true
+audit_obligations:
+  - approval_decision
+  - reviewer_role
+  - policy_reason
+evaluation_refs:
+  - plan_change_trajectory_checks
+tags:
+  - fictional
+  - risk

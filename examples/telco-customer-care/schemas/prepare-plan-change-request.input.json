@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Prepare Plan Change Request Input",
+  "type": "object",
+  "required": ["customer_reference", "requested_plan_id", "consent_reference", "approval_reference"],
+  "properties": {
+    "customer_reference": {
+      "type": "string",
+      "description": "Fictional customer reference."
+    },
+    "requested_plan_id": {
+      "type": "string",
+      "description": "Fictional requested plan identifier."
+    },
+    "consent_reference": {
+      "type": "string",
+      "description": "Fictional consent evidence reference."
+    },
+    "approval_reference": {
+      "type": "string",
+      "description": "Fictional approval evidence reference."
+    }
+  }
+}

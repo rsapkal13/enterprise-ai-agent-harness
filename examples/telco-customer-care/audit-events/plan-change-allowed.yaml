@@ -1,0 +1,24 @@
+event_id: audit.telco.plan_change.allowed.example
+version: 0.1.0
+timestamp: "2026-01-01T00:00:00Z"
+trace_id: trace.telco.plan_change.example.allowed
+event_type: policy_decision
+requester:
+  type: policy_engine
+  id: local-policy-engine
+agent_id: customer-service-agent
+skill_id: customer.change_plan
+policy_id: customer_data.access
+tool_id: customer.read_limited_profile
+workflow_id: customer.change_plan.workflow
+system_id: fictional-crm-system
+context_scope_id: customer.summary
+policy_decision: allow
+side_effects: read_only
+data_classes:
+  - confidential
+outcome: allowed
+evidence:
+  session_purpose: customer-care
+  context_scope: customer.summary
+  note: Fictional example only; no real customer data.

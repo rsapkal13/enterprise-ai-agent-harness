@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Prepare Plan Change Request Output",
+  "type": "object",
+  "required": ["prepared_request_id", "status"],
+  "properties": {
+    "prepared_request_id": {
+      "type": "string",
+      "description": "Fictional prepared request identifier."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["prepared", "requires_review", "blocked"],
+      "description": "Fictional request preparation status."
+    }
+  }
+}

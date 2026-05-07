@@ -1,0 +1,23 @@
+id: fictional-order-system
+version: 0.1.0
+name: Fictional Order System
+description: Fictional order boundary used for preparing a plan-change request.
+owner: order-operations
+lifecycle_state: active
+trust_level: mock
+data_classifications:
+  - confidential
+interfaces:
+  - id: plan-change-request-prepare
+    type: mock
+    description: Mock interface for preparing a fictional plan-change request.
+environments:
+  - test
+operational_constraints:
+  availability_profile: example-only
+  real_system: false
+audit_refs:
+  - audit.telco.plan_change.approval_required.example
+tags:
+  - fictional
+  - order

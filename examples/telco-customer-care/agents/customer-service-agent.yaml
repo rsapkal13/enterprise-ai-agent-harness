@@ -1,24 +1,57 @@
 id: customer-service-agent
 version: 0.1.0
-status: active
 name: Customer Service Agent
-description: Fictional customer-care agent for assisted service journeys.
+description: Fictional assisted-service agent for customer-care journeys.
+purpose: Help service representatives complete bounded customer-care tasks.
 owner: customer-care-platform
-technicalIdentity:
-  type: service_identity
-  reference: CUSTOMER_SERVICE_AGENT_IDENTITY
-allowedSkills:
-  - customer.check_balance
+additional_owners:
+  - ai-governance
+risk_tier: T2
+lifecycle_state: active
+environment: test
+workload_identity:
+  identity_type: service_account
+  identity_ref: fictional-customer-service-agent-identity
+  scopes:
+    - customer-care-read
+    - plan-change-request-prepare
+approved_skills:
   - customer.change_plan
+  - customer.check_balance
   - customer.replace_sim
-channels:
-  - web
+approved_tools:
+  - customer.read_limited_profile
+  - eligibility.check_plan_change
+  - billing.calculate_price_delta
+  - order.prepare_plan_change_request
+allowed_channels:
   - contact-center
-  - chat
-contextScopes:
+  - web
+data_classes:
+  - internal
+  - confidential
+context_scopes:
   - customer.summary
+  - session.context
   - account.entitlements
-  - active.case
+model_policy:
+  allowed_model_classes:
+    - general_purpose
+  prompt_logging: redacted
+memory_policy:
+  mode: session_only
+  retention: none_after_session
+evaluation_pack_ref: plan_change_eval_pack
+slo_profile: assisted-service-standard
+runbook_url: runbook://fictional/customer-service-agent
+rollback_plan: manual_review_and_cancel_prepared_request
+human_oversight_mode: human_in_the_loop
+emergency_stop:
+  enabled: true
+  procedure_ref: runbook://fictional/agent-emergency-stop
+  blocked: false
+audit_refs:
+  - audit.telco.plan_change.allowed.example
 tags:
   - fictional
   - customer-care

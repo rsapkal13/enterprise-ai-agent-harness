@@ -1,0 +1,53 @@
+id: customer_data.access
+version: 0.1.0
+name: Customer Data Access
+description: Limit customer data access to approved context scopes and read-only profile tools.
+owner: data-governance
+lifecycle_state: active
+environment: test
+scope:
+  agents:
+    - customer-service-agent
+  skills:
+    - customer.change_plan
+    - customer.check_balance
+  tools:
+    - customer.read_limited_profile
+    - eligibility.check_plan_change
+    - billing.calculate_price_delta
+  systems:
+    - fictional-crm-system
+    - fictional-billing-system
+    - fictional-product-catalogue-system
+  context_scopes:
+    - customer.summary
+    - session.context
+    - account.entitlements
+  enforcement_points:
+    - context_access
+    - tool_call
+applicable_risk_tiers:
+  - T1
+  - T2
+default_decision: deny
+rules:
+  - id: approved_context_and_read_tools_allowed
+    description: Allow approved context and read-only tools for the active assisted-service session.
+    condition:
+      field: session.purpose
+      operator: equals
+      value: customer-care
+    decision: allow
+approval_conditions:
+  - field: data_classification
+    operator: equals
+    value: restricted
+audit_obligations:
+  - data_classification
+  - context_scope_id
+  - trace_id
+evaluation_refs:
+  - plan_change_eval_pack
+tags:
+  - fictional
+  - data-access

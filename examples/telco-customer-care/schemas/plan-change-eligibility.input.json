@@ -2,15 +2,19 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Plan Change Eligibility Input",
   "type": "object",
-  "required": ["accountReference", "requestedPlanId"],
+  "required": ["customer_reference", "current_plan_id", "requested_plan_id"],
   "properties": {
-    "accountReference": {
+    "customer_reference": {
       "type": "string",
-      "description": "Fictional account reference used by the mock example."
+      "description": "Fictional customer reference."
     },
-    "requestedPlanId": {
+    "current_plan_id": {
       "type": "string",
-      "description": "Fictional target plan identifier."
+      "description": "Fictional current plan identifier."
+    },
+    "requested_plan_id": {
+      "type": "string",
+      "description": "Fictional requested plan identifier."
     }
   }
 }

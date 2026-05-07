@@ -1,21 +1,20 @@
-id: eligibility.check_plan_change
+id: customer.read_limited_profile
 version: 0.1.0
-name: Check Plan Change Eligibility
-description: Check whether a fictional customer is eligible for a requested plan.
-owner: product-operations
+name: Read Limited Customer Profile
+description: Read a fictional limited customer profile summary for assisted service.
+owner: customer-data-platform
 risk_tier: T1
 lifecycle_state: active
 environment: test
-target_system: fictional-product-catalogue-system
+target_system: fictional-crm-system
 adapter_type: mock
 allowed_verbs:
-  - check_eligibility
+  - read_limited_profile
 side_effects: read_only
 auth_method: scoped_workload_identity
-input_schema: schemas/plan-change-eligibility.input.json
-output_schema: schemas/plan-change-eligibility.output.json
+input_schema: schemas/customer-limited-profile.input.json
+output_schema: schemas/customer-limited-profile.output.json
 data_classification:
-  - internal
   - confidential
 rate_limits:
   window: minute
@@ -27,9 +26,9 @@ audit_logging:
   required: true
   event_types:
     - tool_call
-    - system_interaction
+    - context_access
 evaluation_refs:
   - plan_change_trajectory_checks
 tags:
   - fictional
-  - eligibility
+  - profile

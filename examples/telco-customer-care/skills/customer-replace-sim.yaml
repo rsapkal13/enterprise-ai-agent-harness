@@ -1,21 +1,30 @@
 id: customer.replace_sim
 version: 0.1.0
-status: draft
 name: Replace SIM
-description: Supports a fictional SIM replacement journey with additional risk controls.
+description: Placeholder fictional high-risk customer-care capability for future examples.
 owner: customer-care-platform
-riskLevel: high
-allowedAgents:
+risk_tier: T3
+lifecycle_state: draft
+environment: test
+approved_agents:
   - customer-service-agent
-tools: []
+input_contract:
+  required_fields:
+    - customer_reference
+output_contract:
+  fields:
+    - replacement_request_status
+required_context:
+  - customer.summary
+  - session.context
+tool_bindings: []
 policies:
   - consent.required
+  - customer_data.access
   - high_risk.action
-contextScopes:
-  - customer.summary
-  - active.case
-evaluations:
-  - replacement_request_triaged
+evaluation_refs:
+  - plan_change_eval_pack
+audit_required: true
 tags:
   - fictional
-  - account-security
+  - future-example

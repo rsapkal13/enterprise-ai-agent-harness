@@ -1,0 +1,28 @@
+event_id: audit.telco.plan_change.blocked.example
+version: 0.1.0
+timestamp: "2026-01-01T00:02:00Z"
+trace_id: trace.telco.plan_change.example.blocked
+event_type: policy_decision
+requester:
+  type: policy_engine
+  id: local-policy-engine
+agent_id: customer-service-agent
+skill_id: customer.change_plan
+policy_id: customer_data.access
+tool_id: customer.read_limited_profile
+workflow_id: customer.change_plan.workflow
+system_id: fictional-crm-system
+context_scope_id: customer.summary
+policy_decision: deny
+side_effects: read_only
+data_classes:
+  - restricted
+outcome: denied
+evidence:
+  reason: Requested data class exceeds approved scope.
+  note: Fictional example only; no real customer data.
+kill_switch:
+  activated: false
+  reason: Not required for this denied request.
+  affected_ids:
+    - customer-service-agent

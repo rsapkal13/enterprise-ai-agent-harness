@@ -2,15 +2,15 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Plan Change Eligibility Output",
   "type": "object",
-  "required": ["eligible", "reason"],
+  "required": ["eligible", "reason_code"],
   "properties": {
     "eligible": {
       "type": "boolean",
-      "description": "Whether the fictional account is eligible."
+      "description": "Whether the fictional customer is eligible."
     },
-    "reason": {
+    "reason_code": {
       "type": "string",
-      "description": "Public-safe explanation for the eligibility result."
+      "description": "Public-safe fictional reason code."
     }
   }
 }

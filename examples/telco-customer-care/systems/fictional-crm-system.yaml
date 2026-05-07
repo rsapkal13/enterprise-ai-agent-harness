@@ -1,0 +1,24 @@
+id: fictional-crm-system
+version: 0.1.0
+name: Fictional CRM System
+description: Fictional customer profile boundary used for public examples.
+owner: customer-data-platform
+lifecycle_state: active
+trust_level: mock
+data_classifications:
+  - internal
+  - confidential
+interfaces:
+  - id: limited-profile-read
+    type: mock
+    description: Mock interface for reading a limited customer profile summary.
+environments:
+  - test
+operational_constraints:
+  availability_profile: example-only
+  real_system: false
+audit_refs:
+  - audit.telco.plan_change.allowed.example
+tags:
+  - fictional
+  - crm

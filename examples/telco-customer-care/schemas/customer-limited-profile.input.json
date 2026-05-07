@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Limited Customer Profile Input",
+  "type": "object",
+  "required": ["customer_reference", "session_reference"],
+  "properties": {
+    "customer_reference": {
+      "type": "string",
+      "description": "Fictional customer reference."
+    },
+    "session_reference": {
+      "type": "string",
+      "description": "Fictional assisted-service session reference."
+    }
+  }
+}

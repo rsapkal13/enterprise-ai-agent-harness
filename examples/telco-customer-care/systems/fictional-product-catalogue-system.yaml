@@ -1,0 +1,24 @@
+id: fictional-product-catalogue-system
+version: 0.1.0
+name: Fictional Product Catalogue System
+description: Fictional product and eligibility boundary used for plan-change examples.
+owner: product-operations
+lifecycle_state: active
+trust_level: mock
+data_classifications:
+  - internal
+  - confidential
+interfaces:
+  - id: plan-eligibility-read
+    type: mock
+    description: Mock interface for checking fictional plan-change eligibility.
+environments:
+  - test
+operational_constraints:
+  availability_profile: example-only
+  real_system: false
+audit_refs:
+  - audit.telco.plan_change.allowed.example
+tags:
+  - fictional
+  - product-catalogue

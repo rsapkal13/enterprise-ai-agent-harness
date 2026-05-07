@@ -2,15 +2,19 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Price Delta Output",
   "type": "object",
-  "required": ["currency", "monthlyDelta"],
+  "required": ["currency", "monthly_delta", "summary"],
   "properties": {
     "currency": {
       "type": "string",
       "description": "Fictional currency code."
     },
-    "monthlyDelta": {
+    "monthly_delta": {
       "type": "number",
-      "description": "Fictional monthly price change."
+      "description": "Fictional monthly price delta."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Public-safe fictional summary for confirmation."
     }
   }
 }

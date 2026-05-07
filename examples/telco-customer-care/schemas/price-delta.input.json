@@ -2,15 +2,15 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Price Delta Input",
   "type": "object",
-  "required": ["currentPlanId", "requestedPlanId"],
+  "required": ["current_plan_id", "requested_plan_id"],
   "properties": {
-    "currentPlanId": {
+    "current_plan_id": {
       "type": "string",
       "description": "Fictional current plan identifier."
     },
-    "requestedPlanId": {
+    "requested_plan_id": {
       "type": "string",
-      "description": "Fictional target plan identifier."
+      "description": "Fictional requested plan identifier."
     }
   }
 }

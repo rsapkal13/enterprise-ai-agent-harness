@@ -1,39 +1,100 @@
 id: customer.change_plan.workflow
 version: 0.1.0
-status: active
 name: Customer Plan Change Workflow
-description: Fictional workflow for changing a customer plan with policy checks and confirmation.
+description: Fictional workflow for preparing a plan-change request with consent, eligibility, confirmation, approval, and audit evidence.
+owner: customer-care-platform
+risk_tier: T2
+lifecycle_state: active
+environment: test
 steps:
-  - id: confirm_consent
+  - id: read_limited_profile
+    type: tool
+    name: Read limited customer profile
+    tool_ref: customer.read_limited_profile
+    failure_behaviour: manual_review
+    on_success: verify_data_access
+    on_failure: stop
+  - id: verify_data_access
     type: policy
-    name: Confirm customer consent
-    policy: consent.required
+    name: Verify customer data access
+    policy_ref: customer_data.access
+    on_success: check_eligibility
+    on_failure: stop
   - id: check_eligibility
     type: tool
     name: Check plan eligibility
-    tool: eligibility.check_plan_change
-  - id: calculate_delta
+    tool_ref: eligibility.check_plan_change
+    failure_behaviour: manual_review
+    on_success: calculate_price_delta
+    on_failure: stop
+  - id: calculate_price_delta
     type: tool
     name: Calculate price delta
-    tool: billing.calculate_price_delta
-  - id: review_high_risk
-    type: policy
-    name: Review high-risk action controls
-    policy: high_risk.action
-  - id: present_confirmation
+    tool_ref: billing.calculate_price_delta
+    failure_behaviour: manual_review
+    on_success: customer_confirmation
+    on_failure: stop
+  - id: customer_confirmation
     type: approval
-    name: Present plan change confirmation
-    uiManifest: confirm-plan-change
-  - id: submit_order
+    name: Present customer confirmation
+    ui_manifest_ref: confirm-plan-change
+    approval:
+      required: true
+      approver_role: customer
+      evidence:
+        - consent_statement_version
+        - confirmation_timestamp
+    on_success: confirm_consent
+    on_failure: stop
+  - id: confirm_consent
+    type: policy
+    name: Confirm consent policy
+    policy_ref: consent.required
+    on_success: risk_review
+    on_failure: stop
+  - id: risk_review
+    type: policy
+    name: Review elevated-risk action
+    policy_ref: high_risk.action
+    on_success: prepare_change_request
+    on_failure: human_review
+  - id: human_review
+    type: approval
+    name: Human review where required
+    approval:
+      required: true
+      approver_role: service-supervisor
+      evidence:
+        - eligibility_status
+        - price_delta_summary
+        - policy_decision
+    on_success: prepare_change_request
+    on_failure: stop
+  - id: prepare_change_request
     type: tool
-    name: Submit plan change order
-    tool: order.submit_plan_change
+    name: Prepare plan-change request
+    tool_ref: order.prepare_plan_change_request
+    failure_behaviour: manual_review
+    compensation:
+      strategy: manual_review
+      description: Cancel prepared request before submission if review fails.
+    on_success: complete
+    on_failure: stop
   - id: complete
     type: completion
-    name: Complete plan change journey
-rollback:
-  strategy: manual_review
-  description: Future runtimes should define compensation steps for submitted orders.
-evaluations:
-  - plan_change_completed
-  - policy_compliance
+    name: Complete request preparation
+completion_criteria:
+  - eligibility_checked
+  - price_delta_presented
+  - customer_confirmed
+  - required_approval_recorded
+  - change_request_prepared
+escalation_paths:
+  - service-supervisor-review
+evaluation_refs:
+  - plan_change_eval_pack
+  - plan_change_trajectory_checks
+audit_required: true
+tags:
+  - fictional
+  - plan-change

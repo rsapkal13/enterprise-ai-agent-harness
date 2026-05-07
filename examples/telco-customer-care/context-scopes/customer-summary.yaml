@@ -1,0 +1,28 @@
+id: customer.summary
+version: 0.1.0
+name: Customer Summary
+description: Fictional limited customer summary context for assisted service.
+owner: customer-data-platform
+lifecycle_state: active
+environment: test
+data_classification: confidential
+allowed_purposes:
+  - customer-care
+  - plan-change
+allowed_agents:
+  - customer-service-agent
+allowed_skills:
+  - customer.change_plan
+  - customer.check_balance
+source_systems:
+  - fictional-crm-system
+constraints:
+  minimum_necessary: true
+  raw_profile_data: false
+consent_required: false
+audit_required: true
+evaluation_refs:
+  - plan_change_eval_pack
+tags:
+  - fictional
+  - context

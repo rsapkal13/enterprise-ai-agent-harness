@@ -1,0 +1,23 @@
+event_id: audit.telco.plan_change.approval_required.example
+version: 0.1.0
+timestamp: "2026-01-01T00:04:00Z"
+trace_id: trace.telco.plan_change.example.approval
+event_type: approval
+requester:
+  type: workflow_engine
+  id: local-workflow-engine
+agent_id: customer-service-agent
+skill_id: customer.change_plan
+policy_id: high_risk.action
+tool_id: order.prepare_plan_change_request
+workflow_id: customer.change_plan.workflow
+system_id: fictional-order-system
+policy_decision: require_approval
+side_effects: reversible_write
+data_classes:
+  - confidential
+outcome: requires_action
+evidence:
+  approval_reason: Reversible write requires supervisor review in this fictional flow.
+  approver_role: service-supervisor
+  note: Fictional example only; no real customer data.

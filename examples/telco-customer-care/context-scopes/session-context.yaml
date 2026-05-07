@@ -1,0 +1,27 @@
+id: session.context
+version: 0.1.0
+name: Session Context
+description: Fictional current assisted-service session context.
+owner: customer-care-platform
+lifecycle_state: active
+environment: test
+data_classification: internal
+allowed_purposes:
+  - customer-care
+  - consent-capture
+allowed_agents:
+  - customer-service-agent
+allowed_skills:
+  - customer.change_plan
+source_systems:
+  - fictional-crm-system
+constraints:
+  retention: session_only
+  reusable_across_sessions: false
+consent_required: false
+audit_required: true
+evaluation_refs:
+  - plan_change_trajectory_checks
+tags:
+  - fictional
+  - session

@@ -1,22 +1,49 @@
 id: confirm-plan-change
 version: 0.1.0
-status: active
 name: Confirm Plan Change
-journeyId: customer.change_plan.workflow
-surfaces:
+description: Fictional customer confirmation and service-review surfaces for a plan-change request.
+owner: customer-care-platform
+lifecycle_state: active
+environment: test
+journey_ref: customer.change_plan.workflow
+channels:
+  - contact-center
+  - web
+components:
   - id: customer_confirmation
     type: confirmation
     title: Confirm requested plan change
     fields:
-      - current_plan
-      - proposed_plan
+      - current_plan_name
+      - requested_plan_name
       - monthly_price_delta
-      - consent_statement
       - effective_date
-  - id: agent_review
-    type: review
-    title: Review policy and eligibility results
+      - consent_statement
+    required: true
+  - id: supervisor_review
+    type: approval
+    title: Review elevated-risk plan-change request
     fields:
       - eligibility_status
+      - price_delta_summary
       - policy_decisions
       - audit_reference
+    required: true
+confirmation_steps:
+  - customer_confirmation
+disclosure_requirements:
+  - disclose_price_delta
+  - disclose_effective_date
+  - disclose_terms_summary
+human_approval_prompts:
+  - supervisor_review_required_for_reversible_write
+policy_refs:
+  - consent.required
+  - high_risk.action
+audit_refs:
+  - audit.telco.plan_change.approval_required.example
+evaluation_refs:
+  - plan_change_trajectory_checks
+tags:
+  - fictional
+  - ui-manifest

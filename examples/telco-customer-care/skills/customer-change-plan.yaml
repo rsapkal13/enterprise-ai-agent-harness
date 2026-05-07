@@ -1,28 +1,40 @@
 id: customer.change_plan
 version: 0.1.0
-status: active
 name: Change Customer Plan
-description: Helps an authorized service agent move a fictional customer to a different plan.
+description: Prepare a fictional customer plan-change request after consent, eligibility, and price-delta checks.
 owner: customer-care-platform
-riskLevel: high
-allowedAgents:
+risk_tier: T2
+lifecycle_state: active
+environment: test
+approved_agents:
   - customer-service-agent
-tools:
+input_contract:
+  required_fields:
+    - customer_reference
+    - requested_plan_id
+output_contract:
+  fields:
+    - prepared_request_id
+    - confirmation_status
+    - approval_status
+required_context:
+  - customer.summary
+  - session.context
+  - account.entitlements
+tool_bindings:
+  - customer.read_limited_profile
   - eligibility.check_plan_change
   - billing.calculate_price_delta
-  - order.submit_plan_change
+  - order.prepare_plan_change_request
 policies:
   - consent.required
+  - customer_data.access
   - high_risk.action
-contextScopes:
-  - customer.summary
-  - account.entitlements
-  - active.case
-workflow: customer.change_plan.workflow
-evaluations:
-  - plan_change_completed
-  - price_delta_explained
-  - policy_compliance
+workflow_ref: customer.change_plan.workflow
+evaluation_refs:
+  - plan_change_eval_pack
+  - plan_change_trajectory_checks
+audit_required: true
 tags:
   - fictional
-  - account-change
+  - plan-change
