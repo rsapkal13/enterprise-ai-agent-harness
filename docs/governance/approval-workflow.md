@@ -5,16 +5,77 @@ Approval in AgentHarness is a governed process, not a form. Every agent earns it
 ## Flow
 
 ```text
-Registration request
--> Intake gate
--> Risk tiering
--> Privacy / Security / Legal / Architecture review
--> Review decision gate
--> Agent Review Board
--> T3 executive escalation where required
--> Pre-production certification
--> Registered and active
--> Continuous observability
+┌─────────────────────────┐
+│   Registration Request  │
+│  (team submits agent,   │
+│   skills, tools, scope) │
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│      Intake Gate        │  ← Is the request complete?
+│                         │    Does it have owner, risk tier, skills declared?
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│      Risk Tiering       │  ← T0 / T1 / T2 / T3
+│                         │    Drives review depth and approval thresholds
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│   Domain Reviews        │  ← Privacy · Security · Legal · Architecture
+│   (parallel or staged)  │    Each review produces approve / conditions / reject
+└────────────┬────────────┘
+             │
+        ┌────┴─────┐
+        │          │
+        ▼          ▼
+  Approved     Conditions
+  (continue)   (return to team)
+        │
+        ▼
+┌─────────────────────────┐
+│   Agent Review Board    │  ← Cross-functional sign-off
+│                         │    Required for T2 and T3 capabilities
+└────────────┬────────────┘
+             │
+        ┌────┴─────────┐
+        │              │
+        ▼              ▼
+     T0 / T1       T2 / T3
+   (continue)   Executive Escalation
+                       │
+                       ▼
+             ┌─────────────────────┐
+             │  T3 Escalation Gate │
+             └──────────┬──────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────┐
+│    Pre-Production Certification     │  ← Evaluation against required scenarios
+│                                     │    Tool-use paths, policy boundaries,
+│                                     │    adversarial inputs, failure cases
+└────────────────────┬────────────────┘
+                     │
+              ┌──────┴───────┐
+              │              │
+              ▼              ▼
+         Certified       Not Certified
+              │          (return to team)
+              ▼
+┌─────────────────────────┐
+│   Registered & Active   │  ← Runtime constraints enforced:
+│                         │    skills, tools, identity, context,
+│                         │    audit obligations, eval requirements
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│  Continuous Observability│  ← Traces, audit events, evaluations,
+│                         │    drift signals, operational evidence
+└─────────────────────────┘
 ```
 
 ## Principles
