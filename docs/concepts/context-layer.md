@@ -1,11 +1,63 @@
-# Enterprise Context Layer
+# Context Layer
 
-The Enterprise Context Layer controls what context an agent or skill may access.
+## What it is
 
-Context can include user identity, session state, customer profile summaries, case metadata, knowledge references, system state, and policy facts. Access should be explicit, scoped, and auditable.
+The Context Layer provides safe access to enterprise context. It controls business, user, session, memory, system, and entitlement context that an agent can use during execution.
 
-## Context Scope
+## Why it matters
 
-A context scope is a named boundary such as `customer.summary`, `account.entitlements`, or `active.case`. Agents and skills may request scopes, while policies decide whether the request is allowed for the current user, channel, risk level, and purpose.
+Agents often need context to act usefully, but unbounded context creates privacy, security, and correctness risks. Context scopes make access explicit, limited, policy-aware, and auditable.
 
-Context records should avoid storing raw sensitive data in examples. They should describe access patterns and classifications instead.
+## How it works
+
+Context is described as named scopes such as `customer.summary`, `account.entitlements`, or `active.case`. Agents and skills request scopes. Policies decide whether those scopes are allowed for the current identity, channel, risk tier, purpose, and workflow state.
+
+Context records should describe access boundaries and data classifications, not store raw sensitive data in public examples.
+
+## Manifest shape
+
+```yaml
+id: account.entitlements
+version: 0.1.0
+status: active
+name: Account Entitlements
+owner: customer-care-platform
+dataClassification: confidential
+allowedPurpose:
+  - customer-care
+  - plan-change
+sourceSystems:
+  - mock.eligibility-system
+retention:
+  mode: session
+```
+
+## Relationships
+
+- Agents can be approved for context scopes.
+- Skills declare required context scopes.
+- Policies decide whether context access is allowed.
+- Tools may receive context-derived inputs after validation.
+- Workflows can request context at specific steps.
+- Systems can be sources of context.
+- Audit events should record context access decisions without exposing unnecessary sensitive data.
+
+## Design rules
+
+- Request the minimum context needed for a skill.
+- Classify context by sensitivity.
+- Separate context access from raw data storage.
+- Audit access decisions and high-risk context use.
+- Use purpose and channel as policy inputs.
+
+## Anti-patterns
+
+- Giving agents broad memory or data access by default.
+- Storing raw sensitive data in public manifests.
+- Passing context into tools without policy checks.
+- Reusing context across unrelated purposes.
+- Treating context access as a prompt concern only.
+
+## v0.1 scope
+
+v0.1 defines context scope concepts, starter schema, and fictional context examples. Runtime context retrieval, memory systems, entitlement checks, and production data integration are deferred to later releases.
