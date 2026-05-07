@@ -13,25 +13,17 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Validate JSON files
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-          failed = False
-          for path in Path(".").rglob("*.json"):
-              if ".git" in path.parts:
-                  continue
-              try:
-                  json.loads(path.read_text(encoding="utf-8"))
-              except Exception as exc:
-                  failed = True
-                  print(f"{path}: {exc}")
+      - name: Install dependencies
+        run: npm ci
 
-          if failed:
-              raise SystemExit(1)
-          PY
+      - name: Validate schemas and examples
+        run: npm run validate
 
       - name: Check Markdown formatting basics
         run: |

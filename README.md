@@ -139,6 +139,19 @@ Start with:
 - [examples/telco-customer-care/README.md](examples/telco-customer-care/README.md)
 - [backlog/README.md](backlog/README.md)
 
+## Local Validation
+
+The v0.1 repository includes lightweight validation for schemas and fictional example manifests.
+
+```bash
+npm install
+npm run validate:schemas
+npm run validate:examples
+npm run validate
+```
+
+Validation checks that JSON Schemas under `schemas/` compile, YAML files under `examples/` parse, and the telco customer-care sample has basic cross-reference integrity.
+
 ## Example Journey
 
 The first sample journey is a generic telco customer-care plan-change flow. It includes a fictional agent, skills, tools, policies, workflow, system records, context scopes, audit events, evaluation records, and UI manifest.
