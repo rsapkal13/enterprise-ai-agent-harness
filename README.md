@@ -163,7 +163,7 @@ npm run validate:examples
 npm run validate
 ```
 
-Validation checks that JSON Schemas under `schemas/` compile, YAML files under `examples/` parse, and the telco customer-care sample has basic cross-reference integrity.
+Validation checks that JSON Schemas under `schemas/` compile, YAML files under `examples/` parse, telco example manifests match their v0.1 schemas, and the telco customer-care sample has basic cross-reference integrity.
 
 ## Example Journey
 

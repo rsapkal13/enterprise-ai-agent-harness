@@ -1,10 +1,29 @@
 import { readFile, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import Ajv2020 from "ajv/dist/2020.js";
 import YAML from "yaml";
 
 const examplesDir = path.resolve("examples");
 const telcoDir = path.join(examplesDir, "telco-customer-care");
+const schemaDir = path.resolve("schemas");
+const ajv = new Ajv2020({
+  strict: false,
+  validateFormats: false,
+});
+
+const manifestTypes = [
+  ["agents", "agent.schema.json", "id"],
+  ["skills", "skill.schema.json", "id"],
+  ["tools", "tool.schema.json", "id"],
+  ["policies", "policy.schema.json", "id"],
+  ["workflows", "workflow.schema.json", "id"],
+  ["systems", "system.schema.json", "id"],
+  ["context-scopes", "context-scope.schema.json", "id"],
+  ["audit-events", "audit-event.schema.json", "event_id"],
+  ["evaluations", "evaluation.schema.json", "id"],
+  ["ui-manifests", "ui-manifest.schema.json", "id"],
+];
 
 async function listFiles(dir, extensions) {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -83,7 +102,7 @@ function requireRefs(refs, collection, label, file, failures) {
 
 function validateManifestShapes(parsed) {
   const failures = [];
-  const requirements = [
+  const requirements = new Map([
     ["agents", ["id", "version", "name", "owner", "risk_tier", "lifecycle_state"]],
     ["skills", ["id", "version", "name", "owner", "risk_tier", "lifecycle_state"]],
     ["tools", ["id", "version", "name", "owner", "target_system", "side_effects"]],
@@ -94,13 +113,39 @@ function validateManifestShapes(parsed) {
     ["audit-events", ["event_id", "version", "timestamp", "trace_id", "event_type", "requester", "outcome"]],
     ["evaluations", ["id", "version", "name", "owner", "target_type", "scenarios", "pass_threshold"]],
     ["ui-manifests", ["id", "version", "name", "owner", "journey_ref", "channels", "components"]],
-  ];
+  ]);
 
-  for (const [directoryName, fields] of requirements) {
+  for (const [directoryName, fields] of requirements.entries()) {
     const dir = path.join(telcoDir, directoryName);
     for (const [file, manifest] of parsed.entries()) {
       if (file.startsWith(dir + path.sep)) {
         requireFields(manifest, fields, file, failures);
+      }
+    }
+  }
+
+  return failures;
+}
+
+async function validateManifestsAgainstSchemas(parsed) {
+  const failures = [];
+
+  for (const [directoryName, schemaFile] of manifestTypes) {
+    const rawSchema = await readFile(path.join(schemaDir, schemaFile), "utf8");
+    const schema = JSON.parse(rawSchema);
+    const validate = ajv.compile(schema);
+    const dir = path.join(telcoDir, directoryName);
+
+    for (const [file, manifest] of parsed.entries()) {
+      if (!file.startsWith(dir + path.sep)) {
+        continue;
+      }
+
+      if (!validate(manifest)) {
+        for (const error of validate.errors ?? []) {
+          const location = error.instancePath || "/";
+          failures.push(`${relative(file)}: schema ${schemaFile} ${location} ${error.message}`);
+        }
       }
     }
   }
@@ -152,6 +197,7 @@ function validateTelcoReferences(parsed) {
 
   for (const { file, manifest } of workflows.values()) {
     for (const step of manifest.steps ?? []) {
+      requireRef(step.skill_ref, skills, "skill", file, failures);
       requireRef(step.policy_ref, policies, "policy", file, failures);
       requireRef(step.tool_ref, tools, "tool", file, failures);
       requireRef(step.context_scope_ref, contextScopes, "context scope", file, failures);
@@ -218,6 +264,7 @@ const { files, parsed, failures: parseFailures } = await parseYamlFiles();
 const failures = [
   ...parseFailures,
   ...validateManifestShapes(parsed),
+  ...(await validateManifestsAgainstSchemas(parsed)),
   ...validateTelcoReferences(parsed),
 ];
 
