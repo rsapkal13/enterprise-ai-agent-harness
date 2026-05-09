@@ -1,5 +1,7 @@
 # Enterprise AI Agent Harness
 
+![Validate](https://github.com/rsapkal13/enterprise-ai-agent-harness/actions/workflows/validate.yml/badge.svg)
+
 AgentHarness is an open-source specification and execution-harness project for defining, registering, governing, executing, observing, and improving AI capabilities across enterprise ecosystems.
 
 It is not another multi-agent framework. It is the enterprise control plane around AI agents: capability registration, policy decisions, workload identity, workflow boundaries, context access, auditability, evaluation, and lifecycle governance.
