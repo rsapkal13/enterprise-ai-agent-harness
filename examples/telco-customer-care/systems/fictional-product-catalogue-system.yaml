@@ -17,8 +17,12 @@ environments:
 operational_constraints:
   availability_profile: example-only
   real_system: false
+policy_refs:
+  - customer_data.access
 audit_refs:
   - audit.telco.plan_change.allowed.example
+evaluation_refs:
+  - plan_change_trajectory_checks
 tags:
   - fictional
   - product-catalogue

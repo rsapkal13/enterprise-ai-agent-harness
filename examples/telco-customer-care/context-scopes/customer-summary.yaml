@@ -3,8 +3,10 @@ version: 0.1.0
 name: Customer Summary
 description: Fictional limited customer summary context for assisted service.
 owner: customer-data-platform
+risk_tier: T1
 lifecycle_state: active
 environment: test
+context_type: user
 data_classification: confidential
 allowed_purposes:
   - customer-care
@@ -20,9 +22,13 @@ constraints:
   minimum_necessary: true
   raw_profile_data: false
 consent_required: false
+policy_refs:
+  - customer_data.access
 audit_required: true
 evaluation_refs:
   - plan_change_eval_pack
+audit_refs:
+  - audit.telco.plan_change.allowed.example
 tags:
   - fictional
   - context

@@ -3,8 +3,10 @@ version: 0.1.0
 name: Account Entitlements
 description: Fictional entitlement context used to support plan-change eligibility decisions.
 owner: product-operations
+risk_tier: T1
 lifecycle_state: active
 environment: test
+context_type: entitlement
 data_classification: confidential
 allowed_purposes:
   - customer-care
@@ -19,9 +21,14 @@ constraints:
   minimum_necessary: true
   include_sensitive_identifiers: false
 consent_required: true
+policy_refs:
+  - customer_data.access
+  - consent.required
 audit_required: true
 evaluation_refs:
   - plan_change_trajectory_checks
+audit_refs:
+  - audit.telco.plan_change.allowed.example
 tags:
   - fictional
   - entitlement

@@ -13,13 +13,19 @@ tool_id: customer.read_limited_profile
 workflow_id: customer.change_plan.workflow
 system_id: fictional-crm-system
 context_scope_id: customer.summary
-policy_decision: deny
+policy_decision:
+  decision: deny
+  policy_id: customer_data.access
+  reason: Requested data class exceeds approved scope.
+  obligations:
+    - emit_audit_event
 side_effects: read_only
 data_classes:
   - restricted
 outcome: denied
 evidence:
   reason: Requested data class exceeds approved scope.
+  evaluation_ref: plan_change_eval_pack
   note: Fictional example only; no real customer data.
 kill_switch:
   activated: false

@@ -24,6 +24,16 @@ steps:
     type: tool
     name: Check plan eligibility
     tool_ref: eligibility.check_plan_change
+    inputs:
+      from_steps:
+        - read_limited_profile
+      fields:
+        - customer_reference
+        - requested_plan_id
+    outputs:
+      fields:
+        - eligibility_status
+        - eligibility_reason
     failure_behaviour: manual_review
     on_success: calculate_price_delta
     on_failure: stop
@@ -31,6 +41,16 @@ steps:
     type: tool
     name: Calculate price delta
     tool_ref: billing.calculate_price_delta
+    inputs:
+      from_steps:
+        - check_eligibility
+      fields:
+        - current_plan_id
+        - requested_plan_id
+    outputs:
+      fields:
+        - monthly_price_delta
+        - effective_date
     failure_behaviour: manual_review
     on_success: customer_confirmation
     on_failure: stop
@@ -74,6 +94,20 @@ steps:
     type: tool
     name: Prepare plan-change request
     tool_ref: order.prepare_plan_change_request
+    inputs:
+      from_steps:
+        - customer_confirmation
+        - risk_review
+        - human_review
+      fields:
+        - customer_reference
+        - requested_plan_id
+        - consent_statement_version
+        - approval_reference
+    outputs:
+      fields:
+        - prepared_request_id
+        - prepared_request_status
     failure_behaviour: manual_review
     compensation:
       strategy: manual_review
@@ -95,6 +129,10 @@ evaluation_refs:
   - plan_change_eval_pack
   - plan_change_trajectory_checks
 audit_required: true
+audit_refs:
+  - audit.telco.plan_change.allowed.example
+  - audit.telco.plan_change.blocked.example
+  - audit.telco.plan_change.approval_required.example
 tags:
   - fictional
   - plan-change

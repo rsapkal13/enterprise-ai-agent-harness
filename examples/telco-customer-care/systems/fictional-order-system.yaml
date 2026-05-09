@@ -16,8 +16,13 @@ environments:
 operational_constraints:
   availability_profile: example-only
   real_system: false
+policy_refs:
+  - consent.required
+  - high_risk.action
 audit_refs:
   - audit.telco.plan_change.approval_required.example
+evaluation_refs:
+  - plan_change_trajectory_checks
 tags:
   - fictional
   - order

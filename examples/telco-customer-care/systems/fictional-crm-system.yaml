@@ -17,8 +17,13 @@ environments:
 operational_constraints:
   availability_profile: example-only
   real_system: false
+policy_refs:
+  - customer_data.access
 audit_refs:
   - audit.telco.plan_change.allowed.example
+  - audit.telco.plan_change.blocked.example
+evaluation_refs:
+  - plan_change_eval_pack
 tags:
   - fictional
   - crm

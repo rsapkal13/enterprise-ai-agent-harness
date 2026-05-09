@@ -22,9 +22,14 @@ policies:
   - consent.required
   - customer_data.access
   - high_risk.action
+evaluation_requirements:
+  - high_risk_action_check
+  - human_approval_check
 evaluation_refs:
   - plan_change_eval_pack
 audit_required: true
+audit_refs:
+  - audit.telco.plan_change.blocked.example
 tags:
   - fictional
   - future-example

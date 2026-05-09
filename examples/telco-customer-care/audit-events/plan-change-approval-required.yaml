@@ -12,7 +12,14 @@ policy_id: high_risk.action
 tool_id: order.prepare_plan_change_request
 workflow_id: customer.change_plan.workflow
 system_id: fictional-order-system
-policy_decision: require_approval
+policy_decision:
+  decision: require_approval
+  policy_id: high_risk.action
+  rule_id: bounded_t2_prepare_request_requires_review
+  reason: Reversible write requires supervisor review in this fictional flow.
+  obligations:
+    - capture_approval_reason
+    - emit_audit_event
 side_effects: reversible_write
 data_classes:
   - confidential
@@ -20,4 +27,5 @@ outcome: requires_action
 evidence:
   approval_reason: Reversible write requires supervisor review in this fictional flow.
   approver_role: service-supervisor
+  evaluation_ref: plan_change_trajectory_checks
   note: Fictional example only; no real customer data.

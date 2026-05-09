@@ -26,14 +26,26 @@ rules:
   - id: bounded_t2_prepare_request_requires_review
     description: T2 request preparation requires human approval before completion.
     condition:
-      field: tool.side_effects
-      operator: equals
-      value: reversible_write
+      subject:
+        agent_id: customer-service-agent
+      resource:
+        tool_id: order.prepare_plan_change_request
+        workflow_id: customer.change_plan.workflow
+      action:
+        side_effects: reversible_write
+      context:
+        risk_tier: T2
+        customer_confirmation_present: true
     decision: require_approval
+    obligations:
+      - type: capture_approval_reason
+        description: Record why supervisor review is required.
+      - type: emit_audit_event
+        description: Link approval evidence to the workflow trace.
 approval_conditions:
-  - field: workflow.customer_confirmation.present
-    operator: equals
-    value: true
+  - context:
+      customer_confirmation_present: true
+    decision: require_approval
 audit_obligations:
   - approval_decision
   - reviewer_role

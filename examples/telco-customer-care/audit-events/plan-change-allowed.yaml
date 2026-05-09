@@ -13,7 +13,14 @@ tool_id: customer.read_limited_profile
 workflow_id: customer.change_plan.workflow
 system_id: fictional-crm-system
 context_scope_id: customer.summary
-policy_decision: allow
+policy_decision:
+  decision: allow
+  policy_id: customer_data.access
+  rule_id: approved_context_and_read_tools_allowed
+  reason: Approved assisted-service session with read-only profile access.
+  obligations:
+    - emit_audit_event
+    - redact_sensitive_payloads
 side_effects: read_only
 data_classes:
   - confidential
@@ -21,4 +28,5 @@ outcome: allowed
 evidence:
   session_purpose: customer-care
   context_scope: customer.summary
+  evaluation_ref: plan_change_eval_pack
   note: Fictional example only; no real customer data.

@@ -18,6 +18,7 @@ scenarios:
       - consent.required evaluated before order.prepare_plan_change_request
       - high_risk.action evaluated before order.prepare_plan_change_request
       - approval audit event emitted before reversible write
+    adversarial: false
   - id: price_delta_before_confirmation
     description: Ensure customer confirmation includes price-delta evidence.
     golden_outcome:
@@ -25,6 +26,7 @@ scenarios:
     trajectory_expectations:
       - billing.calculate_price_delta called before customer_confirmation step
       - confirm-plan-change UI manifest referenced in workflow
+    adversarial: false
 pass_threshold: 0.95
 certification_status: not_started
 audit_refs:

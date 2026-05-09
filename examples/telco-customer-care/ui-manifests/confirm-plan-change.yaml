@@ -3,6 +3,7 @@ version: 0.1.0
 name: Confirm Plan Change
 description: Fictional customer confirmation and service-review surfaces for a plan-change request.
 owner: customer-care-platform
+risk_tier: T2
 lifecycle_state: active
 environment: test
 journey_ref: customer.change_plan.workflow
@@ -20,6 +21,8 @@ components:
       - effective_date
       - consent_statement
     required: true
+    policy_refs:
+      - consent.required
   - id: supervisor_review
     type: approval
     title: Review elevated-risk plan-change request
@@ -29,6 +32,8 @@ components:
       - policy_decisions
       - audit_reference
     required: true
+    policy_refs:
+      - high_risk.action
 confirmation_steps:
   - customer_confirmation
 disclosure_requirements:

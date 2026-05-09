@@ -20,9 +20,13 @@ tool_bindings:
   - customer.read_limited_profile
 policies:
   - customer_data.access
+evaluation_requirements:
+  - read_only_data_access_check
 evaluation_refs:
   - plan_change_eval_pack
 audit_required: true
+audit_refs:
+  - audit.telco.plan_change.allowed.example
 tags:
   - fictional
   - read-only

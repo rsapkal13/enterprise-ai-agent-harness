@@ -20,6 +20,11 @@ rate_limits:
   window: minute
   max_calls: 20
 approval_required: true
+approval_conditions:
+  - context:
+      customer_confirmation_present: true
+      supervisor_review_required: true
+    decision: require_approval
 policy_refs:
   - consent.required
   - high_risk.action

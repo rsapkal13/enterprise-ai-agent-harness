@@ -3,8 +3,10 @@ version: 0.1.0
 name: Session Context
 description: Fictional current assisted-service session context.
 owner: customer-care-platform
+risk_tier: T1
 lifecycle_state: active
 environment: test
+context_type: session
 data_classification: internal
 allowed_purposes:
   - customer-care
@@ -19,9 +21,13 @@ constraints:
   retention: session_only
   reusable_across_sessions: false
 consent_required: false
+policy_refs:
+  - consent.required
 audit_required: true
 evaluation_refs:
   - plan_change_trajectory_checks
+audit_refs:
+  - audit.telco.plan_change.approval_required.example
 tags:
   - fictional
   - session

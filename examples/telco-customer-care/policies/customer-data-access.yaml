@@ -34,14 +34,32 @@ rules:
   - id: approved_context_and_read_tools_allowed
     description: Allow approved context and read-only tools for the active assisted-service session.
     condition:
-      field: session.purpose
-      operator: equals
-      value: customer-care
+      subject:
+        agent_id: customer-service-agent
+      resource:
+        context_scopes:
+          - customer.summary
+          - session.context
+          - account.entitlements
+        tools:
+          - customer.read_limited_profile
+          - eligibility.check_plan_change
+          - billing.calculate_price_delta
+      action:
+        side_effects: read_only
+      context:
+        session_purpose: customer-care
+        environment: test
     decision: allow
+    obligations:
+      - type: emit_audit_event
+        description: Record context scope, data class, and trace ID.
+      - type: redact_sensitive_payloads
+        description: Do not include raw customer data in audit evidence.
 approval_conditions:
-  - field: data_classification
-    operator: equals
-    value: restricted
+  - resource:
+      data_classification: restricted
+    decision: deny
 audit_obligations:
   - data_classification
   - context_scope_id

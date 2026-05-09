@@ -25,14 +25,28 @@ rules:
   - id: consent_present_allows_progress
     description: Allow progress when current-session consent evidence is present.
     condition:
-      field: context.consent.present
-      operator: equals
-      value: true
+      subject:
+        agent_id: customer-service-agent
+      resource:
+        skill_id: customer.change_plan
+        workflow_id: customer.change_plan.workflow
+      action:
+        type: prepare_plan_change_request
+      context:
+        consent_present: true
+        channel:
+          - contact-center
+          - web
     decision: allow
+    obligations:
+      - type: emit_audit_event
+        description: Capture consent evidence without storing sensitive payloads.
+      - type: show_confirmation
+        description: Present the approved confirmation manifest before continuing.
 approval_conditions:
-  - field: context.consent.present
-    operator: not_equals
-    value: true
+  - context:
+      consent_present: false
+    decision: require_approval
 audit_obligations:
   - consent_timestamp
   - consent_channel

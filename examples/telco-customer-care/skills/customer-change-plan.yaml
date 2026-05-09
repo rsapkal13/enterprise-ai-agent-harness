@@ -31,10 +31,17 @@ policies:
   - customer_data.access
   - high_risk.action
 workflow_ref: customer.change_plan.workflow
+evaluation_requirements:
+  - policy_boundary_checks
+  - tool_sequence_checks
+  - customer_confirmation_checks
 evaluation_refs:
   - plan_change_eval_pack
   - plan_change_trajectory_checks
 audit_required: true
+audit_refs:
+  - audit.telco.plan_change.allowed.example
+  - audit.telco.plan_change.approval_required.example
 tags:
   - fictional
   - plan-change
