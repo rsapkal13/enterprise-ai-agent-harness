@@ -20,6 +20,8 @@ Agent -> Skill -> Policy -> Tool -> Workflow -> System -> Audit
 - Initial backlog and milestone structure
 - Lightweight schema and example validation
 
+Readiness checklist: [v0.1.0-alpha readiness](backlog/v0.1-readiness.md)
+
 Out of scope for v0.1:
 
 - Production runtime

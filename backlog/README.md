@@ -28,6 +28,8 @@ and lightweight validation.
 `v0.1` does not include a production runtime, CLI scaffolding product, Docker or Helm deployment,
 live tool calls, production policy execution, or agent-to-agent delegation.
 
+Track alpha readiness in the [v0.1.0-alpha readiness checklist](v0.1-readiness.md).
+
 ## Future-State Backlog Areas
 
 - [Control plane dashboard](control-plane-dashboard.md)
