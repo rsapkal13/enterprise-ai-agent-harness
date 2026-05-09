@@ -5,6 +5,10 @@
   "description": "Defines structural audit evidence for governed AI execution.",
   "type": "object",
   "additionalProperties": false,
+  "$defs": {
+    "decision": { "type": "string", "enum": ["allow", "deny", "require_approval"] },
+    "side_effects": { "type": "string", "enum": ["read_only", "reversible_write", "irreversible_write"] }
+  },
   "required": [
     "event_id",
     "version",
@@ -17,15 +21,8 @@
   "properties": {
     "event_id": { "type": "string", "description": "Stable audit event identifier." },
     "version": { "type": "string", "description": "Version of this audit event shape." },
-    "timestamp": {
-      "type": "string",
-      "format": "date-time",
-      "description": "Event timestamp in ISO 8601 format."
-    },
-    "trace_id": {
-      "type": "string",
-      "description": "Correlation ID linking this event to a full journey trace."
-    },
+    "timestamp": { "type": "string", "format": "date-time", "description": "Event timestamp in ISO 8601 format." },
+    "trace_id": { "type": "string", "description": "Correlation ID linking this event to a full journey trace." },
     "event_type": {
       "type": "string",
       "enum": ["agent_request", "skill_selected", "policy_decision", "context_access", "tool_call", "workflow_state", "system_interaction", "approval", "outcome", "evaluation", "kill_switch"],
@@ -37,10 +34,7 @@
       "additionalProperties": false,
       "required": ["type", "id"],
       "properties": {
-        "type": {
-          "type": "string",
-          "enum": ["agent", "user", "system", "policy_engine", "workflow_engine", "tool_gateway", "evaluator"]
-        },
+        "type": { "type": "string", "enum": ["agent", "user", "system", "policy_engine", "workflow_engine", "tool_gateway", "evaluator"] },
         "id": { "type": "string" }
       }
     },
@@ -53,19 +47,29 @@
     "context_scope_id": { "type": "string", "description": "Context scope ID related to the event." },
     "evaluation_id": { "type": "string", "description": "Evaluation ID related to the event." },
     "policy_decision": {
-      "type": "string",
-      "enum": ["allow", "deny", "require_approval"],
-      "description": "Policy decision associated with the event."
+      "description": "Policy decision associated with the event. String form is kept for v0.1 compatibility; object form captures richer decision evidence.",
+      "oneOf": [
+        { "$ref": "#/$defs/decision" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["decision"],
+          "properties": {
+            "decision": { "$ref": "#/$defs/decision" },
+            "policy_id": { "type": "string" },
+            "rule_id": { "type": "string" },
+            "reason": { "type": "string" },
+            "obligations": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+          }
+        }
+      ]
     },
-    "side_effects": {
-      "type": "string",
-      "enum": ["read_only", "reversible_write", "irreversible_write"],
-      "description": "Side-effect category associated with the event."
-    },
+    "side_effects": { "$ref": "#/$defs/side_effects" },
     "data_classes": {
       "type": "array",
       "description": "Data classes involved in the event.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "outcome": {
       "type": "string",
@@ -84,10 +88,7 @@
       "properties": {
         "activated": { "type": "boolean" },
         "reason": { "type": "string" },
-        "affected_ids": {
-          "type": "array",
-          "items": { "type": "string" }
-        }
+        "affected_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
       }
     }
   }

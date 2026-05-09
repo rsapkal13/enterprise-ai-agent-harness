@@ -5,6 +5,25 @@
   "description": "Defines evaluation packs, scenarios, golden outcomes, trajectory expectations, pass thresholds, risk applicability, and certification status.",
   "type": "object",
   "additionalProperties": false,
+  "$defs": {
+    "risk_tier": { "type": "string", "enum": ["T0", "T1", "T2", "T3"] },
+    "lifecycle_state": { "type": "string", "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"] },
+    "owner": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["business", "technical"],
+          "properties": {
+            "business": { "type": "string" },
+            "technical": { "type": "string" },
+            "risk": { "type": "string" }
+          }
+        }
+      ]
+    }
+  },
   "required": [
     "id",
     "version",
@@ -21,11 +40,8 @@
     "version": { "type": "string", "description": "Version of this evaluation definition." },
     "name": { "type": "string", "description": "Human-readable evaluation name." },
     "description": { "type": "string", "description": "Evaluation purpose." },
-    "owner": { "type": "string", "description": "Accountable owner or owning group." },
-    "lifecycle_state": {
-      "type": "string",
-      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
-    },
+    "owner": { "$ref": "#/$defs/owner" },
+    "lifecycle_state": { "$ref": "#/$defs/lifecycle_state" },
     "target_type": {
       "type": "string",
       "enum": ["agent", "skill", "policy", "tool", "workflow", "system", "journey"],
@@ -34,26 +50,27 @@
     "target_refs": {
       "type": "array",
       "description": "Object IDs this evaluation applies to.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "applicable_risk_tiers": {
       "type": "array",
-      "items": {
-        "type": "string",
-        "enum": ["T0", "T1", "T2", "T3"]
-      }
+      "description": "Risk tiers where this evaluation is expected.",
+      "items": { "$ref": "#/$defs/risk_tier" },
+      "uniqueItems": true
     },
     "scenarios": {
       "type": "array",
       "description": "Evaluation scenarios.",
+      "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "description"],
         "properties": {
-          "id": { "type": "string" },
-          "description": { "type": "string" },
-          "inputs_ref": { "type": "string" },
+          "id": { "type": "string", "description": "Stable scenario identifier within the evaluation." },
+          "description": { "type": "string", "description": "Scenario intent." },
+          "inputs_ref": { "type": "string", "description": "Reference to scenario inputs or fixture data." },
           "golden_outcome": {
             "type": "object",
             "description": "Expected outcome or assertion summary.",
@@ -61,9 +78,11 @@
           },
           "trajectory_expectations": {
             "type": "array",
-            "description": "Expected tool, policy, workflow, or audit path assertions.",
-            "items": { "type": "string" }
-          }
+            "description": "Expected tool, policy, workflow, approval, or audit path assertions.",
+            "items": { "type": "string" },
+            "uniqueItems": true
+          },
+          "adversarial": { "type": "boolean", "description": "Whether this scenario tests adversarial or boundary behaviour." }
         }
       }
     },
@@ -80,11 +99,10 @@
     },
     "audit_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "description": "Audit event IDs associated with this evaluation or certification evidence.",
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "tags": {
-      "type": "array",
-      "items": { "type": "string" }
-    }
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
   }
 }

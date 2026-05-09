@@ -5,6 +5,26 @@
   "description": "Defines approved UI and channel behaviour, components, confirmations, disclosures, and human approval prompts for agent-led journeys.",
   "type": "object",
   "additionalProperties": false,
+  "$defs": {
+    "risk_tier": { "type": "string", "enum": ["T0", "T1", "T2", "T3"] },
+    "lifecycle_state": { "type": "string", "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"] },
+    "environment": { "type": "string", "enum": ["dev", "test", "staging", "prod"] },
+    "owner": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["business", "technical"],
+          "properties": {
+            "business": { "type": "string" },
+            "technical": { "type": "string" },
+            "risk": { "type": "string" }
+          }
+        }
+      ]
+    }
+  },
   "required": [
     "id",
     "version",
@@ -20,76 +40,71 @@
     "version": { "type": "string", "description": "Version of this UI manifest." },
     "name": { "type": "string", "description": "Human-readable manifest name." },
     "description": { "type": "string", "description": "Purpose of this UI manifest." },
-    "owner": { "type": "string", "description": "Accountable owner or owning group." },
-    "lifecycle_state": {
-      "type": "string",
-      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
-    },
-    "environment": {
-      "type": "string",
-      "enum": ["dev", "test", "staging", "prod"]
-    },
-    "journey_ref": {
-      "type": "string",
-      "description": "Workflow or journey ID this manifest supports."
-    },
+    "owner": { "$ref": "#/$defs/owner" },
+    "risk_tier": { "$ref": "#/$defs/risk_tier" },
+    "lifecycle_state": { "$ref": "#/$defs/lifecycle_state" },
+    "environment": { "$ref": "#/$defs/environment" },
+    "journey_ref": { "type": "string", "description": "Workflow or journey ID this manifest supports." },
     "channels": {
       "type": "array",
       "description": "Channels where this manifest may be used.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "components": {
       "type": "array",
-      "description": "Approved UI components or surfaces.",
+      "description": "Approved UI components or surfaces. These are component contracts, not framework-specific implementations.",
+      "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "type", "title"],
         "properties": {
-          "id": { "type": "string" },
-          "type": {
-            "type": "string",
-            "enum": ["confirmation", "approval", "status", "review", "disclosure", "input"]
-          },
-          "title": { "type": "string" },
-          "fields": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "required": { "type": "boolean" }
+          "id": { "type": "string", "description": "Stable component identifier within the manifest." },
+          "type": { "type": "string", "enum": ["confirmation", "approval", "status", "review", "disclosure", "input"] },
+          "title": { "type": "string", "description": "Human-readable component title." },
+          "fields": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "required": { "type": "boolean" },
+          "policy_refs": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
         }
       }
     },
     "confirmation_steps": {
       "type": "array",
       "description": "Confirmation step IDs or descriptions required before execution.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "disclosure_requirements": {
       "type": "array",
       "description": "Required disclosures for user-facing interactions.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "human_approval_prompts": {
       "type": "array",
       "description": "Approved prompts or prompt references for human approval surfaces.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "policy_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "description": "Policy IDs relevant to this manifest.",
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "audit_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "description": "Audit event IDs associated with this manifest.",
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "evaluation_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "description": "Evaluation IDs that test this experience contract.",
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "tags": {
-      "type": "array",
-      "items": { "type": "string" }
-    }
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
   }
 }

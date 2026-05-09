@@ -5,6 +5,26 @@
   "description": "Defines controlled multi-step execution with policy checks, tool calls, approvals, retries, compensation, escalation, and completion criteria.",
   "type": "object",
   "additionalProperties": false,
+  "$defs": {
+    "risk_tier": { "type": "string", "enum": ["T0", "T1", "T2", "T3"] },
+    "lifecycle_state": { "type": "string", "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"] },
+    "environment": { "type": "string", "enum": ["dev", "test", "staging", "prod"] },
+    "owner": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["business", "technical"],
+          "properties": {
+            "business": { "type": "string" },
+            "technical": { "type": "string" },
+            "risk": { "type": "string" }
+          }
+        }
+      ]
+    }
+  },
   "required": [
     "id",
     "version",
@@ -20,46 +40,47 @@
     "version": { "type": "string", "description": "Version of this workflow definition." },
     "name": { "type": "string", "description": "Human-readable workflow name." },
     "description": { "type": "string", "description": "Business purpose of the workflow." },
-    "owner": { "type": "string", "description": "Accountable owner or owning group." },
-    "risk_tier": {
-      "type": "string",
-      "enum": ["T0", "T1", "T2", "T3"]
-    },
-    "lifecycle_state": {
-      "type": "string",
-      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
-    },
-    "environment": {
-      "type": "string",
-      "enum": ["dev", "test", "staging", "prod"]
-    },
+    "owner": { "$ref": "#/$defs/owner" },
+    "risk_tier": { "$ref": "#/$defs/risk_tier" },
+    "lifecycle_state": { "$ref": "#/$defs/lifecycle_state" },
+    "environment": { "$ref": "#/$defs/environment" },
     "steps": {
       "type": "array",
-      "description": "Ordered workflow steps.",
+      "description": "Ordered workflow steps. Steps reference registered objects by string ID.",
+      "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "type", "name"],
         "properties": {
-          "id": { "type": "string" },
+          "id": { "type": "string", "description": "Stable step identifier within the workflow." },
           "type": {
             "type": "string",
-            "enum": ["policy", "tool", "approval", "decision", "context", "completion"]
+            "enum": ["skill", "policy", "tool", "approval", "decision", "context", "completion"],
+            "description": "Kind of workflow step."
           },
-          "name": { "type": "string" },
+          "name": { "type": "string", "description": "Human-readable step name." },
           "condition": {
             "type": "object",
             "description": "Condition for entering or completing this step.",
             "additionalProperties": true
           },
-          "policy_ref": { "type": "string" },
-          "tool_ref": { "type": "string" },
-          "context_scope_ref": { "type": "string" },
-          "ui_manifest_ref": { "type": "string" },
+          "skill_ref": { "type": "string", "description": "Skill ID for skill steps." },
+          "policy_ref": { "type": "string", "description": "Policy ID for policy or decision steps." },
+          "tool_ref": { "type": "string", "description": "Tool ID for tool steps." },
+          "context_scope_ref": { "type": "string", "description": "Context scope ID for context steps." },
+          "ui_manifest_ref": { "type": "string", "description": "UI manifest ID for approval or confirmation steps." },
+          "inputs": { "type": "object", "description": "Step input bindings or references.", "additionalProperties": true },
+          "outputs": { "type": "object", "description": "Step output bindings or references.", "additionalProperties": true },
           "approval": {
             "type": "object",
             "description": "Approval requirements for this step.",
-            "additionalProperties": true
+            "additionalProperties": true,
+            "properties": {
+              "required": { "type": "boolean" },
+              "approver_role": { "type": "string" },
+              "evidence": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+            }
           },
           "retries": {
             "type": "object",
@@ -77,34 +98,39 @@
           },
           "failure_behaviour": {
             "type": "string",
-            "enum": ["fail_workflow", "retry", "compensate", "manual_review", "continue"]
+            "enum": ["fail_workflow", "retry", "compensate", "manual_review", "continue"],
+            "description": "Expected behaviour when the step fails."
           },
-          "on_success": { "type": "string" },
-          "on_failure": { "type": "string" }
+          "on_success": { "type": "string", "description": "Next step ID on success." },
+          "on_failure": { "type": "string", "description": "Next step ID or terminal state on failure." }
         }
       }
     },
     "escalation_paths": {
       "type": "array",
       "description": "Escalation path references or public-safe role names.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "completion_criteria": {
       "type": "array",
       "description": "Criteria required for successful completion.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "evaluation_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "description": "Evaluation IDs that test this workflow.",
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "audit_required": {
-      "type": "boolean",
-      "description": "Whether workflow execution must emit audit events."
-    },
-    "tags": {
+    "audit_required": { "type": "boolean", "description": "Whether workflow execution must emit audit events." },
+    "audit_refs": {
       "type": "array",
-      "items": { "type": "string" }
-    }
+      "description": "Audit event IDs associated with this workflow.",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
   }
 }

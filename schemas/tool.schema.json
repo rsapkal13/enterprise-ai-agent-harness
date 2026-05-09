@@ -5,6 +5,27 @@
   "description": "Defines governed access to a system action, API, MCP tool, workflow command, or data access path.",
   "type": "object",
   "additionalProperties": false,
+  "$defs": {
+    "risk_tier": { "type": "string", "enum": ["T0", "T1", "T2", "T3"] },
+    "lifecycle_state": { "type": "string", "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"] },
+    "environment": { "type": "string", "enum": ["dev", "test", "staging", "prod"] },
+    "side_effects": { "type": "string", "enum": ["read_only", "reversible_write", "irreversible_write"] },
+    "owner": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["business", "technical"],
+          "properties": {
+            "business": { "type": "string" },
+            "technical": { "type": "string" },
+            "risk": { "type": "string" }
+          }
+        }
+      ]
+    }
+  },
   "required": [
     "id",
     "version",
@@ -25,24 +46,11 @@
     "version": { "type": "string", "description": "Version of this tool definition." },
     "name": { "type": "string", "description": "Human-readable tool name." },
     "description": { "type": "string", "description": "Business-safe tool description." },
-    "owner": { "type": "string", "description": "Accountable owner or owning group." },
-    "risk_tier": {
-      "type": "string",
-      "enum": ["T0", "T1", "T2", "T3"],
-      "description": "Risk tier for this tool."
-    },
-    "lifecycle_state": {
-      "type": "string",
-      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
-    },
-    "environment": {
-      "type": "string",
-      "enum": ["dev", "test", "staging", "prod"]
-    },
-    "target_system": {
-      "type": "string",
-      "description": "System ID this tool interacts with."
-    },
+    "owner": { "$ref": "#/$defs/owner" },
+    "risk_tier": { "$ref": "#/$defs/risk_tier" },
+    "lifecycle_state": { "$ref": "#/$defs/lifecycle_state" },
+    "environment": { "$ref": "#/$defs/environment" },
+    "target_system": { "type": "string", "description": "System ID this tool interacts with." },
     "adapter_type": {
       "type": "string",
       "enum": ["rest", "mcp", "mock", "workflow", "data", "event"],
@@ -51,43 +59,42 @@
     "allowed_verbs": {
       "type": "array",
       "description": "Allowed operation verbs or action names.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "side_effects": {
-      "type": "string",
-      "enum": ["read_only", "reversible_write", "irreversible_write"],
-      "description": "Side-effect category."
-    },
+    "side_effects": { "$ref": "#/$defs/side_effects" },
     "auth_method": {
       "type": "string",
-      "description": "Provider-neutral authentication method or identity boundary."
+      "description": "Provider-neutral authentication method or identity boundary. Do not store credentials."
     },
-    "input_schema": {
-      "type": "string",
-      "description": "Input schema reference."
-    },
-    "output_schema": {
-      "type": "string",
-      "description": "Output schema reference."
-    },
+    "input_schema": { "type": "string", "description": "Input schema reference." },
+    "output_schema": { "type": "string", "description": "Output schema reference." },
     "data_classification": {
       "type": "array",
       "description": "Data classes this tool may handle.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "rate_limits": {
       "type": "object",
       "description": "Declarative rate-limit expectations.",
-      "additionalProperties": true
+      "additionalProperties": true,
+      "properties": {
+        "window": { "type": "string", "description": "Time window label, such as minute or hour." },
+        "max_calls": { "type": "integer", "minimum": 0, "description": "Maximum calls allowed in the window." }
+      }
     },
-    "approval_required": {
-      "type": "boolean",
-      "description": "Whether this tool requires approval before execution."
+    "approval_required": { "type": "boolean", "description": "Whether this tool requires approval before execution." },
+    "approval_conditions": {
+      "type": "array",
+      "description": "Conditions that require approval before tool execution.",
+      "items": { "type": "object", "additionalProperties": true }
     },
     "policy_refs": {
       "type": "array",
       "description": "Policy IDs evaluated before or during tool execution.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "audit_logging": {
       "type": "object",
@@ -95,20 +102,20 @@
       "additionalProperties": false,
       "required": ["required"],
       "properties": {
-        "required": { "type": "boolean" },
+        "required": { "type": "boolean", "description": "Whether audit evidence must be emitted." },
         "event_types": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": { "type": "string" },
+          "uniqueItems": true
         }
       }
     },
     "evaluation_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "description": "Evaluation IDs that test this tool or its use in a trajectory.",
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "tags": {
-      "type": "array",
-      "items": { "type": "string" }
-    }
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
   }
 }

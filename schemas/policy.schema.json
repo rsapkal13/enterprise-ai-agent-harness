@@ -5,6 +5,27 @@
   "description": "Defines policy metadata, scope, rules, default decision, approval conditions, and audit obligations.",
   "type": "object",
   "additionalProperties": false,
+  "$defs": {
+    "risk_tier": { "type": "string", "enum": ["T0", "T1", "T2", "T3"] },
+    "lifecycle_state": { "type": "string", "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"] },
+    "environment": { "type": "string", "enum": ["dev", "test", "staging", "prod"] },
+    "decision": { "type": "string", "enum": ["allow", "deny", "require_approval"] },
+    "owner": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["business", "technical"],
+          "properties": {
+            "business": { "type": "string" },
+            "technical": { "type": "string" },
+            "risk": { "type": "string" }
+          }
+        }
+      ]
+    }
+  },
   "required": [
     "id",
     "version",
@@ -21,66 +42,71 @@
     "version": { "type": "string", "description": "Version of this policy definition." },
     "name": { "type": "string", "description": "Human-readable policy name." },
     "description": { "type": "string", "description": "Policy purpose and control intent." },
-    "owner": { "type": "string", "description": "Accountable owner or owning group." },
-    "lifecycle_state": {
-      "type": "string",
-      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
-    },
-    "environment": {
-      "type": "string",
-      "enum": ["dev", "test", "staging", "prod"]
-    },
+    "owner": { "$ref": "#/$defs/owner" },
+    "lifecycle_state": { "$ref": "#/$defs/lifecycle_state" },
+    "environment": { "$ref": "#/$defs/environment" },
     "scope": {
       "type": "object",
-      "description": "Objects and execution points covered by the policy.",
+      "description": "Objects and execution points covered by the policy. References are string IDs, not hard schema dependencies.",
       "additionalProperties": false,
       "properties": {
-        "agents": { "type": "array", "items": { "type": "string" } },
-        "skills": { "type": "array", "items": { "type": "string" } },
-        "tools": { "type": "array", "items": { "type": "string" } },
-        "workflows": { "type": "array", "items": { "type": "string" } },
-        "systems": { "type": "array", "items": { "type": "string" } },
-        "context_scopes": { "type": "array", "items": { "type": "string" } },
+        "agents": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "skills": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "tools": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "workflows": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "systems": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "context_scopes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
         "enforcement_points": {
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["agent_request", "skill_invocation", "tool_call", "workflow_step", "context_access", "system_interaction"]
-          }
+            "enum": ["agent_request", "skill_invocation", "tool_call", "workflow_step", "context_access", "system_interaction", "approval_decision"]
+          },
+          "uniqueItems": true
         }
       }
     },
     "applicable_risk_tiers": {
       "type": "array",
       "description": "Risk tiers where this policy applies.",
-      "items": {
-        "type": "string",
-        "enum": ["T0", "T1", "T2", "T3"]
-      }
+      "items": { "$ref": "#/$defs/risk_tier" },
+      "uniqueItems": true
     },
-    "default_decision": {
-      "type": "string",
-      "enum": ["allow", "deny", "require_approval"],
-      "description": "Decision when no rule explicitly permits execution."
-    },
+    "default_decision": { "$ref": "#/$defs/decision" },
     "rules": {
       "type": "array",
-      "description": "Declarative rules. This is not a runtime expression language.",
+      "description": "Declarative v0.1 rules. This is not a runtime expression language.",
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "condition", "decision"],
         "properties": {
-          "id": { "type": "string" },
-          "description": { "type": "string" },
+          "id": { "type": "string", "description": "Stable rule identifier within the policy." },
+          "description": { "type": "string", "description": "Human-readable rule intent." },
           "condition": {
             "type": "object",
-            "description": "Portable condition descriptor.",
-            "additionalProperties": true
+            "description": "Portable condition descriptor over subject, resource, action, context, or risk fields.",
+            "additionalProperties": true,
+            "properties": {
+              "subject": { "type": "object", "additionalProperties": true },
+              "resource": { "type": "object", "additionalProperties": true },
+              "action": { "type": "object", "additionalProperties": true },
+              "context": { "type": "object", "additionalProperties": true }
+            }
           },
-          "decision": {
-            "type": "string",
-            "enum": ["allow", "deny", "require_approval"]
+          "decision": { "$ref": "#/$defs/decision" },
+          "obligations": {
+            "type": "array",
+            "description": "Obligations required when the rule matches.",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": ["type"],
+              "properties": {
+                "type": { "type": "string" },
+                "description": { "type": "string" }
+              }
+            }
           }
         }
       }
@@ -88,24 +114,20 @@
     "approval_conditions": {
       "type": "array",
       "description": "Conditions that require human approval.",
-      "items": {
-        "type": "object",
-        "additionalProperties": true
-      }
+      "items": { "type": "object", "additionalProperties": true }
     },
     "audit_obligations": {
       "type": "array",
       "description": "Audit evidence required when this policy is evaluated.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "evaluation_refs": {
       "type": "array",
       "description": "Evaluation IDs that test this policy.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "tags": {
-      "type": "array",
-      "items": { "type": "string" }
-    }
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
   }
 }

@@ -2,9 +2,42 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://enterprise-ai-agent-harness.org/schemas/agent.schema.json",
   "title": "Agent",
-  "description": "Defines an AI agent's identity, purpose, ownership, approved capabilities, lifecycle state, risk tier, and runtime governance boundaries.",
+  "description": "Defines an AI agent's identity, purpose, owners, approved capabilities, lifecycle state, risk tier, and governance boundaries.",
   "type": "object",
   "additionalProperties": false,
+  "$defs": {
+    "risk_tier": {
+      "type": "string",
+      "enum": ["T0", "T1", "T2", "T3"],
+      "description": "Risk tier for the registered object."
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"],
+      "description": "Governance lifecycle state."
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["dev", "test", "staging", "prod"],
+      "description": "Environment where the registration applies."
+    },
+    "owner": {
+      "description": "Accountable owner. String form is allowed for v0.1 examples; structured ownership is preferred for richer governance.",
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["business", "technical"],
+          "properties": {
+            "business": { "type": "string", "description": "Business owner or owning group." },
+            "technical": { "type": "string", "description": "Technical owner or owning group." },
+            "risk": { "type": "string", "description": "Risk, compliance, or governance owner." }
+          }
+        }
+      ]
+    }
+  },
   "required": [
     "id",
     "version",
@@ -17,94 +50,63 @@
     "allowed_channels"
   ],
   "properties": {
-    "id": {
-      "type": "string",
-      "description": "Stable agent identifier."
-    },
-    "version": {
-      "type": "string",
-      "description": "Version of this agent registration."
-    },
-    "name": {
-      "type": "string",
-      "description": "Human-readable agent name."
-    },
-    "description": {
-      "type": "string",
-      "description": "Optional longer description of the agent."
-    },
-    "purpose": {
-      "type": "string",
-      "description": "Business purpose the agent is approved to serve."
-    },
-    "owner": {
-      "type": "string",
-      "description": "Accountable owner or owning group for the agent."
-    },
+    "id": { "type": "string", "description": "Stable agent identifier." },
+    "version": { "type": "string", "description": "Version of this agent registration." },
+    "name": { "type": "string", "description": "Human-readable agent name." },
+    "description": { "type": "string", "description": "Optional longer description of the agent." },
+    "purpose": { "type": "string", "description": "Business purpose the agent is approved to serve." },
+    "owner": { "$ref": "#/$defs/owner" },
     "additional_owners": {
       "type": "array",
       "description": "Additional maintainers or accountable groups.",
       "items": { "type": "string" }
     },
-    "risk_tier": {
-      "type": "string",
-      "enum": ["T0", "T1", "T2", "T3"],
-      "description": "Risk tier for the agent."
-    },
-    "lifecycle_state": {
-      "type": "string",
-      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"],
-      "description": "Current governance lifecycle state."
-    },
-    "environment": {
-      "type": "string",
-      "enum": ["dev", "test", "staging", "prod"],
-      "description": "Environment where this registration applies."
-    },
+    "risk_tier": { "$ref": "#/$defs/risk_tier" },
+    "lifecycle_state": { "$ref": "#/$defs/lifecycle_state" },
+    "environment": { "$ref": "#/$defs/environment" },
     "workload_identity": {
       "type": "object",
       "description": "Provider-neutral workload identity metadata. Do not store secrets here.",
       "additionalProperties": false,
       "properties": {
-        "identity_type": {
-          "type": "string",
-          "description": "Identity type, such as service_account or managed_identity."
-        },
-        "identity_ref": {
-          "type": "string",
-          "description": "Reference to the scoped workload identity."
-        },
+        "identity_type": { "type": "string", "description": "Identity type, such as service_account or managed_identity." },
+        "identity_ref": { "type": "string", "description": "Reference to the scoped workload identity." },
         "scopes": {
           "type": "array",
-          "items": { "type": "string" },
-          "description": "High-level identity scopes or permission groups."
+          "description": "High-level identity scopes or permission groups.",
+          "items": { "type": "string" }
         }
       }
     },
     "approved_skills": {
       "type": "array",
       "description": "Skill IDs this agent is approved to request.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "approved_tools": {
       "type": "array",
       "description": "Tool IDs this agent may use through approved skills and policies.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "allowed_channels": {
       "type": "array",
       "description": "Channels where the agent may operate.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "data_classes": {
       "type": "array",
       "description": "Data classifications the agent may access when policy allows.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "context_scopes": {
       "type": "array",
       "description": "Context scope IDs this agent may request.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "model_policy": {
       "type": "object",
@@ -116,22 +118,16 @@
       "description": "Memory permissions, retention expectations, and reset requirements.",
       "additionalProperties": true
     },
-    "evaluation_pack_ref": {
-      "type": "string",
-      "description": "Evaluation pack ID required for certification."
+    "evaluation_pack_ref": { "type": "string", "description": "Evaluation pack ID required for certification." },
+    "evaluation_refs": {
+      "type": "array",
+      "description": "Additional evaluation IDs associated with this agent.",
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "slo_profile": {
-      "type": "string",
-      "description": "SLO profile ID or name for availability, latency, and reliability expectations."
-    },
-    "runbook_url": {
-      "type": "string",
-      "description": "Public-safe runbook URL or reference."
-    },
-    "rollback_plan": {
-      "type": "string",
-      "description": "Rollback or deactivation plan reference."
-    },
+    "slo_profile": { "type": "string", "description": "SLO profile ID or name for availability, latency, and reliability expectations." },
+    "runbook_url": { "type": "string", "description": "Public-safe runbook URL or reference." },
+    "rollback_plan": { "type": "string", "description": "Rollback or deactivation plan reference." },
     "human_oversight_mode": {
       "type": "string",
       "enum": ["human_led", "human_in_the_loop", "human_on_the_loop", "fully_autonomous"],
@@ -142,19 +138,21 @@
       "description": "Emergency stop controls for blocking agent operation.",
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" },
-        "procedure_ref": { "type": "string" },
-        "blocked": { "type": "boolean" }
+        "enabled": { "type": "boolean", "description": "Whether emergency stop controls are defined." },
+        "procedure_ref": { "type": "string", "description": "Runbook or procedure reference." },
+        "blocked": { "type": "boolean", "description": "Whether the agent is currently blocked by emergency stop." }
       }
     },
     "audit_refs": {
       "type": "array",
       "description": "Audit event IDs associated with approval or operation.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "tags": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     }
   }
 }

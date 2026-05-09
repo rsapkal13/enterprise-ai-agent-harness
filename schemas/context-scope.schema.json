@@ -5,6 +5,26 @@
   "description": "Defines what context can be accessed, by whom, for what purpose, and under what constraints.",
   "type": "object",
   "additionalProperties": false,
+  "$defs": {
+    "risk_tier": { "type": "string", "enum": ["T0", "T1", "T2", "T3"] },
+    "lifecycle_state": { "type": "string", "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"] },
+    "environment": { "type": "string", "enum": ["dev", "test", "staging", "prod"] },
+    "owner": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["business", "technical"],
+          "properties": {
+            "business": { "type": "string" },
+            "technical": { "type": "string" },
+            "risk": { "type": "string" }
+          }
+        }
+      ]
+    }
+  },
   "required": [
     "id",
     "version",
@@ -21,14 +41,14 @@
     "version": { "type": "string", "description": "Version of this context scope definition." },
     "name": { "type": "string", "description": "Human-readable context scope name." },
     "description": { "type": "string", "description": "Public-safe description of the context boundary." },
-    "owner": { "type": "string", "description": "Accountable owner or owning group." },
-    "lifecycle_state": {
+    "owner": { "$ref": "#/$defs/owner" },
+    "risk_tier": { "$ref": "#/$defs/risk_tier" },
+    "lifecycle_state": { "$ref": "#/$defs/lifecycle_state" },
+    "environment": { "$ref": "#/$defs/environment" },
+    "context_type": {
       "type": "string",
-      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
-    },
-    "environment": {
-      "type": "string",
-      "enum": ["dev", "test", "staging", "prod"]
+      "enum": ["business", "user", "session", "memory", "system", "entitlement"],
+      "description": "Primary kind of context exposed through this scope."
     },
     "data_classification": {
       "type": "string",
@@ -37,43 +57,52 @@
     "allowed_purposes": {
       "type": "array",
       "description": "Approved business purposes for this context.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "allowed_agents": {
       "type": "array",
       "description": "Agent IDs allowed to request this scope when policy allows.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "allowed_skills": {
       "type": "array",
       "description": "Skill IDs allowed to request this scope when policy allows.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "source_systems": {
       "type": "array",
       "description": "System IDs that can provide this context.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "constraints": {
       "type": "object",
-      "description": "Access, retention, redaction, or purpose constraints.",
+      "description": "Access, retention, redaction, memory, or purpose constraints.",
       "additionalProperties": true
     },
-    "consent_required": {
-      "type": "boolean",
-      "description": "Whether user or business consent is required before access."
+    "consent_required": { "type": "boolean", "description": "Whether user or business consent is required before access." },
+    "policy_refs": {
+      "type": "array",
+      "description": "Policy IDs governing this context scope.",
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "audit_required": {
-      "type": "boolean",
-      "description": "Whether context access must emit audit evidence."
-    },
+    "audit_required": { "type": "boolean", "description": "Whether context access must emit audit evidence." },
     "evaluation_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "description": "Evaluation IDs that test context access boundaries.",
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "tags": {
+    "audit_refs": {
       "type": "array",
-      "items": { "type": "string" }
-    }
+      "description": "Audit event IDs associated with this context scope.",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
   }
 }

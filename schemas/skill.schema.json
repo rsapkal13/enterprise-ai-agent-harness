@@ -5,6 +5,41 @@
   "description": "Defines a reusable governed business capability that agents may request.",
   "type": "object",
   "additionalProperties": false,
+  "$defs": {
+    "risk_tier": { "type": "string", "enum": ["T0", "T1", "T2", "T3"] },
+    "lifecycle_state": { "type": "string", "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"] },
+    "environment": { "type": "string", "enum": ["dev", "test", "staging", "prod"] },
+    "owner": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["business", "technical"],
+          "properties": {
+            "business": { "type": "string" },
+            "technical": { "type": "string" },
+            "risk": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "contract": {
+      "description": "Input or output contract. Use schema_ref for external schemas or fields for lightweight v0.1 examples.",
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "schema_ref": { "type": "string", "description": "Reference to a JSON schema or manifest-local contract." },
+            "required_fields": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+            "fields": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+          }
+        }
+      ]
+    }
+  },
   "required": [
     "id",
     "version",
@@ -19,85 +54,60 @@
     "policies"
   ],
   "properties": {
-    "id": {
-      "type": "string",
-      "description": "Stable skill identifier."
-    },
-    "version": {
-      "type": "string",
-      "description": "Version of this skill definition."
-    },
-    "name": {
-      "type": "string",
-      "description": "Human-readable skill name."
-    },
-    "description": {
-      "type": "string",
-      "description": "Business description of the capability."
-    },
-    "owner": {
-      "type": "string",
-      "description": "Accountable owner or owning group."
-    },
-    "risk_tier": {
-      "type": "string",
-      "enum": ["T0", "T1", "T2", "T3"],
-      "description": "Risk tier for this capability."
-    },
-    "lifecycle_state": {
-      "type": "string",
-      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
-    },
-    "environment": {
-      "type": "string",
-      "enum": ["dev", "test", "staging", "prod"]
-    },
+    "id": { "type": "string", "description": "Stable skill identifier." },
+    "version": { "type": "string", "description": "Version of this skill definition." },
+    "name": { "type": "string", "description": "Human-readable skill name." },
+    "description": { "type": "string", "description": "Business description of the capability." },
+    "owner": { "$ref": "#/$defs/owner" },
+    "risk_tier": { "$ref": "#/$defs/risk_tier" },
+    "lifecycle_state": { "$ref": "#/$defs/lifecycle_state" },
+    "environment": { "$ref": "#/$defs/environment" },
     "approved_agents": {
       "type": "array",
       "description": "Agent IDs approved to request this skill.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "input_contract": {
-      "type": "object",
-      "description": "Input contract reference or lightweight field list.",
-      "additionalProperties": true
-    },
-    "output_contract": {
-      "type": "object",
-      "description": "Output contract reference or lightweight field list.",
-      "additionalProperties": true
-    },
+    "input_contract": { "$ref": "#/$defs/contract" },
+    "output_contract": { "$ref": "#/$defs/contract" },
     "required_context": {
       "type": "array",
       "description": "Context scope IDs required by the skill.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "tool_bindings": {
       "type": "array",
       "description": "Tool IDs this skill may invoke.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "policies": {
       "type": "array",
       "description": "Policy IDs that apply to this skill.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "workflow_ref": {
-      "type": "string",
-      "description": "Workflow ID used for multi-step execution."
+    "workflow_ref": { "type": "string", "description": "Workflow ID used for multi-step execution." },
+    "evaluation_requirements": {
+      "type": "array",
+      "description": "Evaluation requirement names or controls that must be satisfied before production use.",
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "evaluation_refs": {
       "type": "array",
       "description": "Evaluation or evaluation pack IDs required for this skill.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "audit_required": {
-      "type": "boolean",
-      "description": "Whether skill invocation must produce audit evidence."
-    },
-    "tags": {
+    "audit_required": { "type": "boolean", "description": "Whether skill invocation must produce audit evidence." },
+    "audit_refs": {
       "type": "array",
-      "items": { "type": "string" }
-    }
+      "description": "Audit event IDs associated with this skill.",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
   }
 }

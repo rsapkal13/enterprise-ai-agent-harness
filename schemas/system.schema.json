@@ -5,6 +5,25 @@
   "description": "Defines a registered system boundary used by governed tools and workflows.",
   "type": "object",
   "additionalProperties": false,
+  "$defs": {
+    "lifecycle_state": { "type": "string", "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"] },
+    "environment": { "type": "string", "enum": ["dev", "test", "staging", "prod"] },
+    "owner": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["business", "technical"],
+          "properties": {
+            "business": { "type": "string" },
+            "technical": { "type": "string" },
+            "risk": { "type": "string" }
+          }
+        }
+      ]
+    }
+  },
   "required": [
     "id",
     "version",
@@ -22,11 +41,8 @@
     "version": { "type": "string", "description": "Version of this system registration." },
     "name": { "type": "string", "description": "Human-readable system name." },
     "description": { "type": "string", "description": "Public-safe description of the system boundary." },
-    "owner": { "type": "string", "description": "Accountable owner or owning group." },
-    "lifecycle_state": {
-      "type": "string",
-      "enum": ["draft", "pending_approval", "approved", "active", "deprecated", "retired", "blocked"]
-    },
+    "owner": { "$ref": "#/$defs/owner" },
+    "lifecycle_state": { "$ref": "#/$defs/lifecycle_state" },
     "trust_level": {
       "type": "string",
       "enum": ["mock", "internal", "partner", "external", "unknown"],
@@ -35,7 +51,8 @@
     "data_classifications": {
       "type": "array",
       "description": "Data classes this system may hold or process.",
-      "items": { "type": "string" }
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "interfaces": {
       "type": "array",
@@ -45,35 +62,42 @@
         "additionalProperties": false,
         "required": ["id", "type"],
         "properties": {
-          "id": { "type": "string" },
-          "type": {
-            "type": "string",
-            "enum": ["rest", "mcp", "event", "workflow", "data", "mock"]
-          },
-          "description": { "type": "string" }
+          "id": { "type": "string", "description": "Stable interface identifier within the system." },
+          "type": { "type": "string", "enum": ["rest", "mcp", "event", "workflow", "data", "mock"] },
+          "description": { "type": "string" },
+          "environment": { "$ref": "#/$defs/environment" }
         }
       }
     },
     "environments": {
       "type": "array",
       "description": "Environments where this system boundary is registered.",
-      "items": {
-        "type": "string",
-        "enum": ["dev", "test", "staging", "prod"]
-      }
+      "items": { "$ref": "#/$defs/environment" },
+      "uniqueItems": true
     },
     "operational_constraints": {
       "type": "object",
       "description": "Public-safe operational constraints such as availability windows or rate expectations.",
       "additionalProperties": true
     },
+    "policy_refs": {
+      "type": "array",
+      "description": "Policy IDs governing access to this system.",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
     "audit_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "description": "Audit event IDs associated with this system.",
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
-    "tags": {
+    "evaluation_refs": {
       "type": "array",
-      "items": { "type": "string" }
-    }
+      "description": "Evaluation IDs associated with this system boundary.",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
   }
 }
