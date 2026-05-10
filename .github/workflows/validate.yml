@@ -32,7 +32,7 @@ jobs:
 
           failed = False
           for path in Path(".").rglob("*.md"):
-              if ".git" in path.parts:
+              if ".git" in path.parts or "node_modules" in path.parts:
                   continue
               text = path.read_text(encoding="utf-8")
               if not text.endswith("\n"):
