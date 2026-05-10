@@ -1,178 +1,177 @@
-# Enterprise AI Agent Harness
+# Documentation
 
-Welcome to the Enterprise AI Agent Harness documentation. This is a specification for the control layer that enables governed, auditable AI execution in enterprise environments.
+Enterprise AI Agent Harness, also called AgentHarness, is an open-source specification and execution-harness project for defining, registering, governing, executing, observing, and improving AI capabilities across enterprise ecosystems.
 
-> **v0.1 Note:** This is a specification release focused on schema definition and reference implementations. Runtime execution is out of scope for v0.1.
-
----
+This documentation is the public starting point for the v0.1 specification release. It explains the operating model, registry objects, governance concepts, fictional examples, and build roadmap.
 
 ## Start Here
 
-**New to the Harness?** Choose your path based on your role:
+If you are new to the project, read these first:
 
-- **Enterprise Architects & Governance Leaders** → [Vision](./vision.md) | [Governance Model](./governance.md) | [Architecture Overview](./architecture.md)
-- **Developers & Integrators** → [Quickstart](./quickstart.md) | [Concepts](./concepts/) | [Schemas](./schemas/)
-- **Security & Compliance Teams** → [Governance Model](./governance.md) | [Audit Model](./concepts/audit.md) | [Privacy Framework](./governance.md)
-- **Open Source Contributors** → [Contributing](../CONTRIBUTING.md) | [Architecture](./architecture.md) | [Backlog](../BACKLOG.md)
+1. [Vision](vision.md)
+2. [Architecture overview](architecture/overview.md)
+3. [Agent, skill, tool, and policy model](architecture/agent-skill-tool-policy-model.md)
+4. [Quickstart guide](guides/quickstart.md)
+5. [Telco customer-care example](../examples/telco-customer-care/README.md)
 
----
+## What AgentHarness Is
 
-## What is Enterprise AI Agent Harness?
+AgentHarness is not another multi-agent framework. It is the enterprise control plane around AI agents: capability registration, policy decisions, workload identity, workflow boundaries, context access, auditability, evaluation, and lifecycle governance.
 
-The **Enterprise AI Agent Harness** is an open, vendor-neutral specification for building governed AI agent systems. It defines:
-
-- **How agents execute** multi-step workflows with human oversight
-- **How governance is applied** through policies, approvals, and consent checkpoints
-- **How actions are audited** for compliance and risk management
-- **How systems remain observable** through standardized traces and evaluations
-
-The Harness is designed for enterprises that need:
-- ✅ Explainability and auditability of AI decisions
-- ✅ Fine-grained control and approval workflows
-- ✅ Risk and compliance frameworks
-- ✅ Vendor independence and portability
-
----
+It helps teams describe what an AI capability is allowed to do before runtime and prove what happened after execution.
 
 ## Core Operating Model
 
-The Harness defines five core abstractions:
+```text
+Agent -> Skill -> Policy -> Tool -> Workflow -> System -> Audit
+```
 
-| Object | Purpose |
-|--------|---------|
-| **Agent** | Describes an AI entity with capabilities, policies, and execution context |
-| **Skill** | Encapsulates a reusable task or decision point |
-| **Tool** | External system integration (APIs, databases, services) |
-| **Workflow** | Orchestrates skills and tools with conditions, approvals, and retries |
-| **Policy** | Governs execution through consent checkpoints, approval gates, and compliance rules |
+Agents should not call raw enterprise systems directly. They should execute registered skills through governed tools, policy checks, scoped identity, workflow orchestration, controlled context, and auditable traces.
 
-These objects are managed in a **Registry** and composed into **Systems** that execute bounded business journeys.
+## Recommended Reading Paths
 
----
+### Enterprise Architects
 
-## Reading Paths
+- [Vision](vision.md)
+- [Architecture overview](architecture/overview.md)
+- [Reference architecture](architecture/reference-architecture.md)
+- [Design principles](architecture/design-principles.md)
+- [Agent, skill, tool, and policy model](architecture/agent-skill-tool-policy-model.md)
 
-### 🎯 The Big Picture (15 min read)
-1. [Vision](./vision.md) — Why the Harness exists
-2. [Architecture Overview](./architecture.md) — System boundaries and design principles
+### Developers
 
-### 🛠️ Building with the Harness (30 min read)
-1. [Core Concepts](./concepts/) — Registry, agents, skills, tools, workflows, policies
-2. [Schema Overview](./schemas/) — How objects are defined
-3. [Quickstart Guide](./quickstart.md) — Your first agent manifest
+- [Quickstart guide](guides/quickstart.md)
+- [Defining a skill](guides/defining-a-skill.md)
+- [Registering a tool](guides/registering-a-tool.md)
+- [Creating an agent](guides/creating-an-agent.md)
+- [Creating a workflow](guides/creating-a-workflow.md)
+- [Telco customer-care example](../examples/telco-customer-care/README.md)
 
-### 📋 Governance & Compliance (25 min read)
-1. [Governance Model](./governance.md) — Responsible AI framework
-2. [Audit & Tracing](./concepts/audit.md) — How execution is recorded
-3. [Privacy & Data Handling](./governance.md#privacy-framework)
+### Governance, Risk, Privacy, and Security Teams
 
-### 🔍 Deep Dives (45 min+ read)
-1. [Agent Lifecycle](./reference/lifecycle.md)
-2. [Policy Decision Model](./concepts/policy.md)
-3. [Workflow Execution Model](./concepts/workflow.md)
-4. [Observability & Evaluation](./concepts/observability.md)
+- [Risk classification](governance/risk-classification.md)
+- [Approval workflow](governance/approval-workflow.md)
+- [Responsible AI](governance/responsible-ai.md)
+- [Audit model](governance/audit-model.md)
+- [Human in the loop](governance/human-in-the-loop.md)
+- [Data and privacy](governance/data-and-privacy.md)
 
----
+### Open-Source Contributors
+
+- [Quickstart guide](guides/quickstart.md)
+- [Concepts](concepts/)
+- [Roadmap](../ROADMAP.md)
+- [Backlog](../backlog/README.md)
+- [Telco customer-care example](../examples/telco-customer-care/README.md)
+
+### Product and Technology Leaders
+
+- [Vision](vision.md)
+- [Architecture overview](architecture/overview.md)
+- [Risk classification](governance/risk-classification.md)
+- [Approval workflow](governance/approval-workflow.md)
+- [Roadmap](../ROADMAP.md)
 
 ## Specification Objects
 
-The Harness defines portable JSON Schema specifications for:
+The v0.1 specification uses registry objects to describe governed AI capabilities:
 
-- **agent.schema.json** — Agent configuration and capabilities
-- **skill.schema.json** — Skill definitions and contracts
-- **tool.schema.json** — Tool gateway configuration
-- **policy.schema.json** — Governance and control rules
-- **workflow.schema.json** — Execution orchestration
-- **ui-manifest.schema.json** — User interaction definitions
-- **evaluation.schema.json** — Quality metrics and assessment
+- Agent Registry
+- Skill Registry
+- Tool Gateway
+- Policy Engine
+- Workflow Engine
+- System Registry
+- Context Layer
+- Experience Manifest
+- Evaluation Service
+- Observability and Audit
 
-👉 [View all schemas →](./schemas/)
-
----
+Start with the [concept documentation](concepts/) for business and technical explanations, then review the schema notes in [schemas](schemas/) and the JSON Schema files in the repository root `schemas/` directory.
 
 ## Governance Model
 
-The Harness embeds governance at three levels:
+AgentHarness uses governance that scales with risk, not bureaucracy.
 
-1. **Policy Layer** — Consent, approval, and compliance checkpoints
-2. **Audit Layer** — Immutable recording of execution traces and decisions
-3. **Evaluation Layer** — Quality, safety, and compliance assessment
+The main governance entry points are:
 
-For details, see [Governance & Compliance](./governance.md).
+- [Risk classification](governance/risk-classification.md)
+- [Approval workflow](governance/approval-workflow.md)
+- [Audit model](governance/audit-model.md)
+- [Human in the loop](governance/human-in-the-loop.md)
+- [Data and privacy](governance/data-and-privacy.md)
 
----
+Risk tiers are:
 
-## Example Journey: Telco Customer Care
+- `T0` - Informational
+- `T1` - Bounded operational
+- `T2` - Transactional
+- `T3` - High impact
 
-The **telco change-plan example** demonstrates a real-world customer service journey:
+Approval creates binding runtime constraints. It is not just permission.
 
-- Customer requests a plan change
-- Agent gathers context and validates eligibility
-- Policy gates require approval for high-value changes
-- System executes tools to process the change
-- Audit trail captures all decisions and user interactions
-- Evaluation metrics measure customer satisfaction
+## Example Journey
 
-👉 [Explore the telco example →](./examples/telco-customer-care/)
+The first complete sample is a fictional telco customer-care plan-change journey:
 
----
+- [Telco customer-care example](../examples/telco-customer-care/README.md)
 
-## v0.1 Scope
+It demonstrates:
 
-**In scope for v0.1:**
-- ✅ Schema finalization for all core objects
-- ✅ Reference examples (telco, banking)
-- ✅ Governance model definition
-- ✅ Audit and compliance framework
-- ✅ CI/CD validation tooling
+- A customer-service agent with approved skills and tools
+- A plan-change skill
+- Consent, customer data access, and high-risk action policies
+- Governed tools for profile, eligibility, price delta, and request preparation
+- A workflow with confirmation and approval steps
+- Fictional systems, context scopes, audit events, evaluations, and a UI manifest
 
-**Out of scope for v0.1:**
-- ❌ Runtime execution engine
-- ❌ Policy engine implementation
-- ❌ Tool gateway implementation
-- ❌ Production observability integrations
+The example is organisation-neutral and contains no real customer data, private APIs, credentials, or sensitive architecture details.
 
----
+## Current v0.1 Scope
 
-## What's Not Included
+`v0.1 - Spec Release` focuses on:
 
-The Harness is a **specification and framework**, not a runtime platform. You will need to:
+- Public documentation foundation
+- Draft schemas
+- Fictional enterprise journeys
+- Backlog and milestones
+- Contribution structure
+- Package boundaries
+- Lightweight validation tooling
 
-- **Implement the runtime** that interprets these schemas
-- **Build the policy engine** that evaluates governance rules
-- **Integrate external tools** through the tool gateway interface
-- **Deploy observability** for your execution environment
+Use the quickstart to validate the repository locally:
 
-The Harness provides the **vocabulary and contracts**; you provide the **execution engine**.
+```bash
+npm install
+npm run validate
+```
 
----
+## What Is Not Included Yet
 
-## Get Involved
+v0.1 is not a production runtime release.
 
-### For Developers
-- 📖 [Contributing Guide](../CONTRIBUTING.md)
-- 🐛 [Issues & Features](../issues)
-- 🗺️ [Roadmap](../ROADMAP.md)
+The following are future roadmap items:
 
-### For the Community
-- 💬 [Discussions](../discussions)
-- 📋 [Backlog](../BACKLOG.md)
-- ⭐ Star the repo if you find this useful!
+- Production policy execution
+- Live tool gateway integrations
+- Durable workflow runtime
+- CLI scaffolding product
+- Docker, Helm, or hosted deployment guidance
+- Runtime-connected dashboard
+- Human approval queue
+- Agent directory and controlled delegation
 
----
+See the [Roadmap](../ROADMAP.md) and [Backlog](../backlog/README.md) for planned work.
 
-## Quick Links
+## How To Contribute
 
-| Link | Purpose |
-|------|---------|
-| [Quickstart](./quickstart.md) | Get started in 5 minutes |
-| [Architecture](./architecture.md) | Understand system design |
-| [Schemas](./schemas/) | View all JSON schemas |
-| [Examples](./examples/) | Reference implementations |
-| [Governance](./governance.md) | Compliance framework |
-| [Roadmap](../ROADMAP.md) | What's planned |
-| [Contributing](../CONTRIBUTING.md) | How to contribute |
+Good first contribution areas include:
 
----
+- Documentation
+- Schemas
+- Fictional examples
+- Backlog items
+- Validation tooling
+- CI checks
 
-**Questions?** Check the [FAQ](./faq.md) or open an [issue](../issues).
+Start by reading the [Quickstart guide](guides/quickstart.md), then review the [Backlog](../backlog/README.md). Keep all contributions vendor-neutral, organisation-neutral, and safe for a public open-source repository.

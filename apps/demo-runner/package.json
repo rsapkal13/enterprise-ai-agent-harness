@@ -1,0 +1,10 @@
+{
+  "name": "@enterprise-ai-harness/demo-runner",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Local demo runner for Enterprise AI Agent Harness example journeys.",
+  "type": "module",
+  "scripts": {
+    "demo:telco": "node src/telco-demo.js"
+  }
+}
