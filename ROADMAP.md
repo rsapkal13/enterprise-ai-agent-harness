@@ -39,6 +39,8 @@ Out of scope for v0.1:
 - Simple workflow state runner
 - CLI scope proposal for manifest validation and local fixture loading
 
+Readiness checklist: [v0.2 readiness](backlog/v0.2-readiness.md)
+
 ## v0.3 - Governance and Workflow
 
 - Policy composition model

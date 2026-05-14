@@ -1,8 +1,8 @@
 # System Design: Workflow Engine (v0.2)
 
-**Status:** Draft  
-**Version:** 0.2  
-**Date:** 2026-05-14  
+**Status:** Draft
+**Version:** 0.2
+**Date:** 2026-05-14
 **Scope:** `packages/workflow-engine`, integrations with `policy-engine`, `tool-gateway`, `observability`
 
 ---

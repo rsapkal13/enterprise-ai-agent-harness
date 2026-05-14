@@ -25,6 +25,15 @@ jobs:
       - name: Validate schemas and examples
         run: npm run validate
 
+      - name: Run package tests
+        run: npm test
+
+      - name: Install admin console dependencies
+        run: npm --prefix apps/admin-console ci
+
+      - name: Build admin console
+        run: npm run admin:build
+
       - name: Check Markdown formatting basics
         run: |
           python - <<'PY'

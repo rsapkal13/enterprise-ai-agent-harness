@@ -1,38 +1,97 @@
 # Milestones
 
-## v0.1 - Spec Release ✅ Tagged: v0.1.0-alpha
+## v0.1 - Spec Release
 
 - Repository foundation
 - Public docs and draft schemas
-- Telco customer-care sample journey (agent, skill, policy, tool, workflow, system, context, audit, evaluation, UI manifest)
+- Telco customer-care sample journey
+- System, context, audit, evaluation, and UI manifest object coverage
 - Architecture and governance documentation
 - Cross-reference validation tooling
 
-## v0.2 - Local Runtime Preview ✅ Ready to tag: v0.2.0
+Status: tagged as `v0.1.0-alpha`.
 
-Delivered (original scope plus significant pull-forward):
+## v0.2 - Local Runtime Preview
 
-- YAML manifest loader with field mapping
-- In-memory registries for all nine object types with lifecycle state machine
-- Registry-backed mock tool gateway (mock / REST / MCP adapters)
-- Workflow engine: tool, policy, approval, and completion step execution
-- Rule-based policy evaluator with condition matching (subject, resource, context, risk-tier ceiling)
-- Human approval gates (park/resume workflow execution)
-- LIFO compensation stack (saga-style undo on failure)
-- Per-step retry with exponential backoff
-- Append-only in-memory audit sink (write, queryable by traceId / actor / time / outcome)
-- Structured trace emitter with correlation IDs and child emitter support
-- Telco plan-change demo runner (upgrade and high-value downgrade scenarios)
-- Banking card dispute end-to-end example
-- Interactive demo dashboard (HTML)
-- Governance portal admin console — Phase A static registry browser + Phase E approval queue scaffold
-- 167 tests, 53 suites, 0 failures across 7 packages
+- YAML manifest loader
+- In-memory registries
+- Mock tool gateway
+- Basic policy decision contract
+- In-memory workflow state runner
+- Trace emitter and in-memory audit sink
+- Banking card-dispute fictional journey
+- Admin console prototype for registry, approval, evidence, and relationship graph review
 
-Issues to close at v0.2.0 tag:
-- #54 Workflow engine core
-- #55 In-memory registries
-- #56 Tool gateway with registry-backed routing
-- #57 In-memory workflow engine (JS runtime)
-- #58 Demo runner — telco plan-change journey
-- #59 Banking card dispute example
-- #60 Policy engine �
+Status: not ready to tag until the latest `Validate` workflow is green and `npm test` reliably
+executes package tests. See [v0.2 readiness](v0.2-readiness.md).
+
+## v0.3 - Policy and Workflow
+
+- Policy evaluation request contract
+- Structured policy decision object
+- Workflow approval pause and resume
+- Compensation stack
+- Retry and timeout model
+- Audit obligations connected to policy and workflow steps
+
+See [Phase 3: Policy and Workflow](phase-3-policy-and-workflow.md).
+
+## v0.4 - Observability and Evaluation
+
+- Trace event contract
+- In-memory trace emitter
+- Audit writer interface
+- Evaluation result coverage model
+- Local evidence report
+- Trace-linked audit event examples
+
+See [Phase 4: Observability and Evaluation](phase-4-observability.md).
+
+## v0.5 - Demo Experiences
+
+- Demo runner journey selector
+- Approval-required walkthrough
+- Rejected-action walkthrough
+- Admin console static registry browser expansion
+- UI manifest rendering example
+- Website alignment with current scope and future roadmap
+
+See [Phase 5: Demo Experiences](phase-5-demo-experiences.md).
+
+## v0.6 - Runtime-Connected Dashboard
+
+- Runtime status contract
+- Journey monitor view
+- Evaluation console
+- Trace-linked audit events
+- Runtime package naming and publishing strategy
+- CLI scope for validation and local fixture workflows
+
+See [Phase 6: Runtime-Connected Dashboard](phase-6-runtime-connected-dashboard.md).
+
+## v0.7 - Human Approval Operations
+
+- Approval request object
+- Approval decision API
+- Approval audit log view
+- Scope-change and recertification flow
+- Reviewer role and decision evidence model
+
+See [Phase 7: Human Approval Operations](phase-7-human-approval-operations.md).
+
+## v0.8 - Agent Directory and Controlled Delegation
+
+- Agent capability card schema
+- Allow-listed discovery model
+- Policy-gated handoff
+- Delegation audit event
+- Maturity guidance for controlled agent collaboration
+
+See [Phase 8: Agent Directory and Controlled Delegation](phase-8-agent-directory-and-delegation.md).
+
+## Post-v0.8 - Deployment and Managed Operations
+
+- Self-hosted deployment guidance
+- Managed control-plane considerations
+- Authentication and role-based access model
+- Multi-tenant operating model

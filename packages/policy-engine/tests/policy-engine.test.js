@@ -17,14 +17,13 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "../../..");
+const moduleUrl = (...segments) => pathToFileURL(path.join(repoRoot, ...segments)).href;
 
-const { RuleBasedPolicyEvaluator, createPolicyEvaluator } = await import(
-  path.join(repoRoot, "packages/policy-engine/src/policy-engine.js")
-);
+const { RuleBasedPolicyEvaluator, createPolicyEvaluator } = await import(moduleUrl("packages/policy-engine/src/policy-engine.js"));
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 

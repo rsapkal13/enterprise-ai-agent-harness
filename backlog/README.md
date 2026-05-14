@@ -29,6 +29,7 @@ and lightweight validation.
 live tool calls, production policy execution, or agent-to-agent delegation.
 
 Track alpha readiness in the [v0.1.0-alpha readiness checklist](v0.1-readiness.md).
+Track local runtime preview readiness in the [v0.2 readiness checklist](v0.2-readiness.md).
 
 ## Future-State Backlog Areas
 
@@ -36,6 +37,17 @@ Track alpha readiness in the [v0.1.0-alpha readiness checklist](v0.1-readiness.m
 - [Website alignment](website-alignment.md)
 - [Runtime CLI, packaging, and deployment](runtime-cli-packaging-deployment.md)
 - [Agent directory and controlled delegation](agent-directory-and-delegation.md)
+
+## Release Phase Backlogs
+
+- [v0.1 Spec Release](phase-1-spec-release.md)
+- [v0.2 Local Runtime Preview](phase-2-local-runtime.md)
+- [v0.3 Policy and Workflow](phase-3-policy-and-workflow.md)
+- [v0.4 Observability and Evaluation](phase-4-observability.md)
+- [v0.5 Demo Experiences](phase-5-demo-experiences.md)
+- [v0.6 Runtime-Connected Dashboard](phase-6-runtime-connected-dashboard.md)
+- [v0.7 Human Approval Operations](phase-7-human-approval-operations.md)
+- [v0.8 Agent Directory and Controlled Delegation](phase-8-agent-directory-and-delegation.md)
 
 ## Issue Readiness
 

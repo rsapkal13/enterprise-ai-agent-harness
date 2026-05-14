@@ -1,8 +1,8 @@
 # ADR-001: Workflow Execution Model & State Persistence
 
-**Status:** Accepted  
-**Date:** 2026-05-14  
-**Deciders:** Transformation Lead (Ravi)  
+**Status:** Accepted
+**Date:** 2026-05-14
+**Deciders:** Transformation Lead (Ravi)
 **Affected packages:** `workflow-engine`, `observability`, `policy-engine`
 
 ---
@@ -22,10 +22,10 @@ These decisions shape the testability, debuggability, and upgrade path of the en
 
 ### Options Considered
 
-**Option A — Orchestration (centralised runner)**  
+**Option A — Orchestration (centralised runner)**
 A single `WorkflowRunner` class drives step execution. It knows the full `WorkflowDefinition`, calls each step in order, manages state transitions, invokes PolicyEngine, and handles compensation. [...]
 
-**Option B — Choreography (event-driven)**  
+**Option B — Choreography (event-driven)**
 Steps are independent event handlers. Each step listens for a "step N complete" event and emits a "step N+1 start" event. No central coordinator. Steps are decoupled by design.
 
 ### Decision
@@ -52,13 +52,13 @@ Steps are independent event handlers. Each step listens for a "step N complete" 
 
 ### Options Considered
 
-**Option A — In-memory Map (v0.2)**  
+**Option A — In-memory Map (v0.2)**
 `WorkflowState` stored in a `Map<string, WorkflowState>` inside the runner process. Zero dependencies, instant setup, works for demos and tests.
 
-**Option B — SQLite file-backed store**  
+**Option B — SQLite file-backed store**
 Durable across restarts. Still zero external dependencies for local dev. More complex to set up; requires schema migrations.
 
-**Option C — Postgres/Redis from day one**  
+**Option C — Postgres/Redis from day one**
 Production-grade. Requires infrastructure to be running for any local work. Too heavyweight for v0.2.
 
 ### Decision

@@ -6,10 +6,10 @@ Demonstrates risk classification, evidence gathering, human review gates, provis
 
 ## Scenarios
 
-**Scenario A — Low-risk (auto-complete)**  
+**Scenario A — Low-risk (auto-complete)**
 Transaction amount < $200 → risk score 0.32 → skips human review → provisional credit issued → audit record created.
 
-**Scenario B — High-risk (park → reject → compensate)**  
+**Scenario B — High-risk (park → reject → compensate)**
 Transaction amount > $200 → risk score 0.75 → parks at `fraud_analyst_review` → analyst rejects → provisional credit reversed via compensation.
 
 ## Run

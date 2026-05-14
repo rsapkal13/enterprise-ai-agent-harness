@@ -8,23 +8,16 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot  = path.resolve(__dirname, "../../..");
+const moduleUrl = (...segments) => pathToFileURL(path.join(repoRoot, ...segments)).href;
 
-const { InMemoryWorkflowEngine } = await import(
-  path.join(repoRoot, "packages/workflow-engine/src/in-memory-workflow-engine.js")
-);
-const { callMockTool } = await import(
-  path.join(repoRoot, "packages/tool-gateway/src/adapters/mock-adapter.js")
-);
-const { loadExampleManifests } = await import(
-  path.join(repoRoot, "packages/core/src/loader.js")
-);
-const { buildRegistries } = await import(
-  path.join(repoRoot, "packages/registries/src/in-memory-registry.js")
-);
+const { InMemoryWorkflowEngine } = await import(moduleUrl("packages/workflow-engine/src/in-memory-workflow-engine.js"));
+const { callMockTool } = await import(moduleUrl("packages/tool-gateway/src/adapters/mock-adapter.js"));
+const { loadExampleManifests } = await import(moduleUrl("packages/core/src/loader.js"));
+const { buildRegistries } = await import(moduleUrl("packages/registries/src/in-memory-registry.js"));
 
 // ── Shared fixtures ───────────────────────────────────────────────────────────
 

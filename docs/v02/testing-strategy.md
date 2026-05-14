@@ -1,7 +1,7 @@
 # Testing Strategy: Workflow Engine & Policy Engine (v0.2)
 
-**Status:** Accepted  
-**Date:** 2026-05-14  
+**Status:** Accepted
+**Date:** 2026-05-14
 **Scope:** `packages/workflow-engine`, `packages/policy-engine`, integration with `tool-gateway` and `observability`
 
 ---

@@ -8,14 +8,13 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot  = path.resolve(__dirname, "../../..");
+const moduleUrl = (...segments) => pathToFileURL(path.join(repoRoot, ...segments)).href;
 
-const { callMockTool } = await import(
-  path.join(repoRoot, "packages/tool-gateway/src/adapters/mock-adapter.js")
-);
+const { callMockTool } = await import(moduleUrl("packages/tool-gateway/src/adapters/mock-adapter.js"));
 
 /** Helper: build a minimal ToolCallRequest */
 function req(toolId, input = {}) {
