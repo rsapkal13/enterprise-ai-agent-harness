@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentHarness Demo Runner</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #070b12;
+  --bg-2: #0b1220;
+  --surface: rgba(15, 23, 42, 0.82);
+  --surface-2: rgba(22, 33, 55, 0.92);
+  --surface-3: rgba(30, 41, 59, 0.92);
+  --line: rgba(148, 163, 184, 0.18);
+  --line-strong: rgba(125, 211, 252, 0.34);
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --soft: #cbd5e1;
+  --cyan: #38bdf8;
+  --cyan-2: #0ea5e9;
+  --amber: #f59e0b;
+  --green: #22c55e;
+  --red: #ef4444;
+  --violet: #8b5cf6;
+  --shadow: 0 28px 90px rgba(0, 0, 0, 0.45);
+  --radius: 18px;
+  --radius-sm: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--bg);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(56, 189, 248, 0.22), transparent 34rem),
+    radial-gradient(circle at 86% 8%, rgba(139, 92, 246, 0.16), transparent 36rem),
+    linear-gradient(180deg, #07101d 0%, #070b12 44%, #05070d 100%);
+}
+
+button,
+select {
+  font: inherit;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--line);
+  background: rgba(7, 11, 18, 0.78);
+  backdrop-filter: blur(18px);
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 16px 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.brand-mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 10px;
+  color: #06111e;
+  background: linear-gradient(135deg, #7dd3fc, #38bdf8 45%, #8b5cf6);
+  box-shadow: 0 0 34px rgba(56, 189, 248, 0.32);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.brand-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.brand-subtitle {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-links a,
+.mini-link {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.nav-links a:hover,
+.mini-link:hover {
+  color: var(--text);
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.shell {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px 24px 46px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
+  gap: 24px;
+  align-items: stretch;
+  margin-bottom: 24px;
+}
+
+.hero-copy,
+.run-card,
+.panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.86), rgba(15, 23, 42, 0.68));
+  box-shadow: var(--shadow);
+}
+
+.hero-copy {
+  min-height: 318px;
+  padding: 34px;
+}
+
+.hero-copy::after,
+.run-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -26% -42% 38%;
+  height: 220px;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.2), transparent 68%);
+}
+
+.release {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.release-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--cyan);
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.7);
+}
+
+h1 {
+  max-width: 820px;
+  margin: 0;
+  font-size: clamp(38px, 6vw, 74px);
+  line-height: 0.96;
+  letter-spacing: -0.06em;
+}
+
+.gradient-text {
+  color: transparent;
+  background: linear-gradient(90deg, #f8fafc 0%, #7dd3fc 42%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.hero-copy p {
+  max-width: 720px;
+  margin: 22px 0 0;
+  color: var(--soft);
+  font-size: 17px;
+}
+
+.model-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 30px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.model-line span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.model-node {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 7px 9px;
+  color: var(--soft);
+}
+
+.arrow {
+  color: var(--cyan);
+}
+
+.run-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 318px;
+  padding: 24px;
+}
+
+.run-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.eyebrow {
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.run-title {
+  margin-top: 8px;
+  font-size: 21px;
+  font-weight: 760;
+  letter-spacing: -0.03em;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: var(--muted);
+  background: rgba(15, 23, 42, 0.74);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #64748b;
+}
+
+.status.running::before { background: var(--cyan); box-shadow: 0 0 16px rgba(56, 189, 248, 0.8); }
+.status.parked::before { background: var(--amber); box-shadow: 0 0 16px rgba(245, 158, 11, 0.7); }
+.status.completed::before { background: var(--green); box-shadow: 0 0 16px rgba(34, 197, 94, 0.7); }
+.status.failed::before { background: var(--red); box-shadow: 0 0 16px rgba(239, 68, 68, 0.7); }
+
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.scenario {
+  min-height: 126px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  color: var(--text);
+  text-align: left;
+  background: rgba(7, 11, 18, 0.38);
+  cursor: pointer;
+  transition: border-color 150ms ease, transform 150ms ease, background 150ms ease;
+}
+
+.scenario:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  background: rgba(14, 165, 233, 0.08);
+}
+
+.scenario:disabled {
+  cursor: default;
+  opacity: 0.58;
+}
+
+.scenario.active {
+  border-color: var(--cyan);
+  background: rgba(14, 165, 233, 0.12);
+}
+
+.scenario-name {
+  font-size: 14px;
+  font-weight: 760;
+}
+
+.scenario-copy {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.scenario-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 8px;
+  color: var(--soft);
+  background: rgba(15, 23, 42, 0.78);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.chip.cyan { color: #bae6fd; border-color: rgba(56, 189, 248, 0.26); background: rgba(14, 165, 233, 0.1); }
+.chip.amber { color: #fde68a; border-color: rgba(245, 158, 11, 0.28); background: rgba(245, 158, 11, 0.1); }
+.chip.green { color: #bbf7d0; border-color: rgba(34, 197, 94, 0.28); background: rgba(34, 197, 94, 0.1); }
+.chip.red { color: #fecaca; border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1); }
+.chip.violet { color: #ddd6fe; border-color: rgba(139, 92, 246, 0.3); background: rgba(139, 92, 246, 0.11); }
+
+.run-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 14px;
+  color: var(--text);
+  background: rgba(15, 23, 42, 0.86);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 760;
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  background: rgba(30, 41, 59, 0.92);
+}
+
+.btn:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.btn-primary {
+  border-color: rgba(56, 189, 248, 0.55);
+  color: #06111e;
+  background: linear-gradient(135deg, #7dd3fc, #38bdf8);
+  box-shadow: 0 18px 40px rgba(14, 165, 233, 0.22);
+}
+
+.btn-danger {
+  border-color: rgba(239, 68, 68, 0.36);
+  color: #fee2e2;
+  background: rgba(127, 29, 29, 0.46);
+}
+
+.btn-approve {
+  border-color: rgba(34, 197, 94, 0.46);
+  color: #052e16;
+  background: linear-gradient(135deg, #86efac, #22c55e);
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 370px;
+  gap: 24px;
+}
+
+.main-stack,
+.side-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.panel {
+  padding: 20px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.panel-title {
+  font-size: 16px;
+  font-weight: 760;
+  letter-spacing: -0.02em;
+}
+
+.panel-subtitle {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.kpi {
+  min-height: 104px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(7, 11, 18, 0.34);
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 780;
+  letter-spacing: -0.05em;
+}
+
+.kpi-label {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.kpi-note {
+  margin-top: 10px;
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+}
+
+.workflow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.bpmn-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px 2px 18px;
+  margin-bottom: 16px;
+}
+
+.bpmn-node {
+  position: relative;
+  display: grid;
+  min-width: 148px;
+  max-width: 180px;
+  min-height: 92px;
+  align-content: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(7, 11, 18, 0.34);
+}
+
+.bpmn-node:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -15px;
+  width: 15px;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+.bpmn-node:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: calc(50% - 4px);
+  right: -17px;
+  width: 8px;
+  height: 8px;
+  border-top: 1px solid var(--line-strong);
+  border-right: 1px solid var(--line-strong);
+  transform: rotate(45deg);
+}
+
+.bpmn-node.start,
+.bpmn-node.end {
+  min-width: 104px;
+  border-radius: 999px;
+  text-align: center;
+}
+
+.bpmn-node.gateway {
+  min-width: 116px;
+  max-width: 126px;
+  border-radius: 8px;
+  transform: rotate(45deg) scale(0.82);
+}
+
+.bpmn-node.gateway > * {
+  transform: rotate(-45deg) scale(1.18);
+}
+
+.bpmn-node.human {
+  border-style: dashed;
+  border-color: rgba(245, 158, 11, 0.42);
+}
+
+.bpmn-node.active {
+  border-color: rgba(56, 189, 248, 0.58);
+  background: rgba(14, 165, 233, 0.14);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.16), 0 18px 38px rgba(14, 165, 233, 0.1);
+}
+
+.bpmn-node.done {
+  border-color: rgba(34, 197, 94, 0.34);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.bpmn-node.parked {
+  border-color: rgba(245, 158, 11, 0.48);
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.bpmn-node.failed {
+  border-color: rgba(239, 68, 68, 0.42);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.bpmn-kind {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bpmn-label {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1.25;
+}
+
+.bpmn-status {
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(7, 11, 18, 0.32);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.step.active {
+  transform: translateX(2px);
+  border-color: rgba(56, 189, 248, 0.52);
+  background: rgba(14, 165, 233, 0.12);
+}
+
+.step.done {
+  border-color: rgba(34, 197, 94, 0.32);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.step.parked {
+  border-color: rgba(245, 158, 11, 0.42);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.step.failed {
+  border-color: rgba(239, 68, 68, 0.42);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.step.compensated {
+  border-color: rgba(139, 92, 246, 0.36);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.step-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  background: rgba(15, 23, 42, 0.86);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.step.active .step-icon { color: #06111e; background: var(--cyan); border-color: var(--cyan); }
+.step.done .step-icon { color: #052e16; background: var(--green); border-color: var(--green); }
+.step.parked .step-icon { color: #451a03; background: var(--amber); border-color: var(--amber); }
+.step.failed .step-icon { color: #450a0a; background: #fca5a5; border-color: #fca5a5; }
+.step.compensated .step-icon { color: #2e1065; background: #c4b5fd; border-color: #c4b5fd; }
+
+.step-name {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 740;
+}
+
+.step-meta,
+.step-output {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.step-output {
+  overflow: hidden;
+  color: #bae6fd;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.approval-card {
+  display: none;
+  margin-top: 14px;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 16px;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.12), rgba(15, 23, 42, 0.78));
+}
+
+.approval-card.visible {
+  display: block;
+}
+
+.approval-title {
+  color: #fde68a;
+  font-weight: 780;
+}
+
+.approval-copy {
+  margin: 8px 0 14px;
+  color: var(--soft);
+  font-size: 13px;
+}
+
+.approval-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.context-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.context-item,
+.evidence-item {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(7, 11, 18, 0.32);
+}
+
+.context-key,
+.evidence-key {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.context-value,
+.evidence-value {
+  overflow: hidden;
+  margin-top: 6px;
+  color: var(--soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.registry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summary-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.summary-row {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 11px 12px;
+  background: rgba(7, 11, 18, 0.32);
+}
+
+.summary-label {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.summary-value {
+  color: var(--soft);
+  font-size: 12px;
+}
+
+.summary-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.registry-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(7, 11, 18, 0.34);
+}
+
+.registry-count {
+  font-size: 25px;
+  font-weight: 780;
+  letter-spacing: -0.04em;
+}
+
+.registry-label {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.trace-log {
+  display: flex;
+  max-height: 366px;
+  flex-direction: column;
+  gap: 7px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.trace-row {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 10px;
+  color: var(--muted);
+  background: rgba(7, 11, 18, 0.34);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+}
+
+.trace-row.highlight {
+  color: #bae6fd;
+  border-color: rgba(56, 189, 248, 0.32);
+  background: rgba(14, 165, 233, 0.09);
+}
+
+.trace-row.warn {
+  color: #fde68a;
+  border-color: rgba(245, 158, 11, 0.32);
+  background: rgba(245, 158, 11, 0.09);
+}
+
+.trace-row.err {
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.32);
+  background: rgba(239, 68, 68, 0.09);
+}
+
+.empty {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pulse {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media (max-width: 1120px) {
+  .hero,
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .side-stack {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+  }
+
+  .shell {
+    padding: 20px 14px 32px;
+  }
+
+  .hero-copy,
+  .run-card,
+  .panel {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .scenario-grid,
+  .kpi-grid,
+  .context-grid,
+  .registry-grid,
+  .side-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .step {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .step > .chip {
+    grid-column: 2;
+    width: max-content;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">AH</div>
+        <div>
+          <div class="brand-title">Enterprise AI Agent Harness</div>
+          <div class="brand-subtitle">Demo runner placeholder for the v0.1 Spec Release</div>
+        </div>
+      </div>
+      <nav class="nav-links" aria-label="Demo links">
+        <a href="../../README.md">Spec README</a>
+        <a href="../../docs/index.md">Docs</a>
+        <a href="../../examples/telco-customer-care/README.md">Example Journey</a>
+        <a href="../../backlog/v0.1-readiness.md">Readiness</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero" aria-labelledby="pageTitle">
+      <div class="hero-copy">
+        <div class="release"><span class="release-dot"></span> v0.1 Spec Release Demo</div>
+        <h1 id="pageTitle">Governed AI journey <span class="gradient-text">simulator</span>.</h1>
+        <p>
+          Explore how AgentHarness connects registries, policy decisions, workflow boundaries,
+          tool access, system touchpoints, and audit evidence without claiming a production runtime.
+        </p>
+        <div class="model-line" aria-label="Core operating model">
+          <span><b class="model-node">Agent</b><em class="arrow">-&gt;</em></span>
+          <span><b class="model-node">Skill</b><em class="arrow">-&gt;</em></span>
+          <span><b class="model-node">Policy</b><em class="arrow">-&gt;</em></span>
+          <span><b class="model-node">Tool</b><em class="arrow">-&gt;</em></span>
+          <span><b class="model-node">Workflow</b><em class="arrow">-&gt;</em></span>
+          <span><b class="model-node">System</b><em class="arrow">-&gt;</em></span>
+          <span><b class="model-node">Audit</b></span>
+        </div>
+      </div>
+
+      <aside class="run-card" aria-labelledby="runTitle">
+        <div class="run-header">
+          <div>
+            <div class="eyebrow">Fictional customer-care journey</div>
+            <div class="run-title" id="runTitle">Telco plan change</div>
+          </div>
+          <div class="status" id="statusBadge">Idle</div>
+        </div>
+
+        <div class="scenario-grid">
+          <button class="scenario" id="scenarioA" type="button" onclick="runScenario('A')">
+            <div class="scenario-name">Scenario A: Upgrade</div>
+            <div class="scenario-copy">Allowed path with eligibility check, price delta, customer confirmation, and audit evidence.</div>
+            <div class="scenario-meta">
+              <span class="chip cyan">T2</span>
+              <span class="chip green">allow</span>
+              <span class="chip">web</span>
+            </div>
+          </button>
+          <button class="scenario" id="scenarioB" type="button" onclick="runScenario('B')">
+            <div class="scenario-name">Scenario B: Downgrade</div>
+            <div class="scenario-copy">Approval-required path when a sensitive commercial impact threshold is crossed.</div>
+            <div class="scenario-meta">
+              <span class="chip cyan">T2</span>
+              <span class="chip amber">approval</span>
+              <span class="chip">contact-centre</span>
+            </div>
+          </button>
+          <button class="scenario" id="scenarioC" type="button" onclick="runScenario('C')">
+            <div class="scenario-name">Scenario C: Order error</div>
+            <div class="scenario-copy">Order execution fails, a debug skill is approved, a data issue is fixed, and the workflow resumes.</div>
+            <div class="scenario-meta">
+              <span class="chip red">error</span>
+              <span class="chip amber">2 approvals</span>
+              <span class="chip violet">debug</span>
+            </div>
+          </button>
+          <button class="scenario" id="scenarioD" type="button" onclick="runScenario('D')">
+            <div class="scenario-name">Scenario D: Uncertified refund</div>
+            <div class="scenario-copy">A customer challenges a plan change and the agent attempts an uncertified iPhone refund skill and tool.</div>
+            <div class="scenario-meta">
+              <span class="chip red">blocked</span>
+              <span class="chip red">uncertified</span>
+              <span class="chip">refund</span>
+            </div>
+          </button>
+        </div>
+
+        <div class="run-actions">
+          <button class="btn btn-primary" id="btnRunA" type="button" onclick="runScenario('A')">Run allowed path</button>
+          <button class="btn" id="btnRunB" type="button" onclick="runScenario('B')">Run approval path</button>
+          <button class="btn" id="btnRunC" type="button" onclick="runScenario('C')">Run error recovery</button>
+          <button class="btn" id="btnRunD" type="button" onclick="runScenario('D')">Run uncertified block</button>
+          <button class="btn" id="btnReset" type="button" onclick="reset()" style="display:none">Reset</button>
+        </div>
+      </aside>
+    </section>
+
+    <section class="dashboard" aria-label="Demo dashboard">
+      <div class="main-stack">
+        <section class="panel" aria-labelledby="metricsTitle">
+          <div class="panel-header">
+            <div>
+              <div class="eyebrow">Control plane snapshot</div>
+              <div class="panel-title" id="metricsTitle">Registry and run health</div>
+              <div class="panel-subtitle">Counts are seeded from the fictional telco journey manifests.</div>
+            </div>
+            <span class="chip cyan" id="traceIdChip">trace: not started</span>
+          </div>
+          <div class="kpi-grid">
+            <div class="kpi">
+              <div class="kpi-value" id="agentCount">0</div>
+              <div class="kpi-label">active agent</div>
+              <div class="kpi-note">customer-service-agent</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-value" id="skillCount">0</div>
+              <div class="kpi-label">approved skills</div>
+              <div class="kpi-note">plan-change capability</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-value" id="toolCount">0</div>
+              <div class="kpi-label">governed tools</div>
+              <div class="kpi-note">system access wrappers</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-value" id="policyCount">0</div>
+              <div class="kpi-label">policies checked</div>
+              <div class="kpi-note">deny by default</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="workflowTitle">
+          <div class="panel-header">
+            <div>
+              <div class="eyebrow">Workflow execution</div>
+              <div class="panel-title" id="workflowTitle">Agent -> Skill -> Policy -> Tool -> Workflow -> System -> Audit</div>
+              <div class="panel-subtitle">The run starts when the AI agent is invoked with a defined intent and input payload.</div>
+            </div>
+            <span class="chip" id="currentStepChip">no active step</span>
+          </div>
+          <div class="bpmn-flow" id="bpmnFlow" aria-label="BPMN-style workflow"></div>
+          <div class="workflow" id="stepList"></div>
+          <div class="approval-card" id="approvalBox">
+            <div class="approval-title">Human approval required</div>
+            <div class="approval-copy" id="approvalPrompt"></div>
+            <div class="approval-actions">
+              <button class="btn btn-approve" type="button" onclick="handleApproval(true)">Approve action</button>
+              <button class="btn btn-danger" type="button" onclick="handleApproval(false)">Reject action</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="contextTitle">
+          <div class="panel-header">
+            <div>
+              <div class="eyebrow">Context and evidence</div>
+              <div class="panel-title" id="contextTitle">Scoped context used during the run</div>
+              <div class="panel-subtitle">Only fictional, minimum necessary data is shown.</div>
+            </div>
+          </div>
+          <div class="context-grid" id="ctxGrid"></div>
+        </section>
+      </div>
+
+      <aside class="side-stack">
+        <section class="panel" aria-labelledby="registryTitle">
+          <div class="panel-header">
+            <div>
+              <div class="eyebrow">Registered objects</div>
+              <div class="panel-title" id="registryTitle">Journey manifest map</div>
+            </div>
+          </div>
+          <div class="registry-grid">
+            <div class="registry-card"><div class="registry-count">1</div><div class="registry-label">agent</div></div>
+            <div class="registry-card"><div class="registry-count">3</div><div class="registry-label">skills</div></div>
+            <div class="registry-card"><div class="registry-count">4</div><div class="registry-label">systems</div></div>
+            <div class="registry-card"><div class="registry-count">3</div><div class="registry-label">policies</div></div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="executionSummaryTitle">
+          <div class="panel-header">
+            <div>
+              <div class="eyebrow">Execution governance</div>
+              <div class="panel-title" id="executionSummaryTitle">Agent, skills, tools, confidence</div>
+            </div>
+          </div>
+          <div class="summary-stack">
+            <div class="summary-row">
+              <div class="summary-label">Agent</div>
+              <div class="summary-value" id="agentSummary">not invoked</div>
+            </div>
+            <div class="summary-row">
+              <div class="summary-label">Certified</div>
+              <div class="summary-value" id="certifiedSummary">not evaluated</div>
+            </div>
+            <div class="summary-row">
+              <div class="summary-label">Confidence</div>
+              <div class="summary-value" id="confidenceSummary">not started</div>
+            </div>
+            <div class="summary-row">
+              <div class="summary-label">Skills</div>
+              <div class="summary-list" id="skillsUsed"></div>
+            </div>
+            <div class="summary-row">
+              <div class="summary-label">Tools</div>
+              <div class="summary-list" id="toolsUsed"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="evidenceTitle">
+          <div class="panel-header">
+            <div>
+              <div class="eyebrow">Audit evidence</div>
+              <div class="panel-title" id="evidenceTitle">Latest decision object</div>
+            </div>
+          </div>
+          <div class="evidence-item">
+            <div class="evidence-key">Decision</div>
+            <div class="evidence-value" id="decisionValue">not evaluated</div>
+          </div>
+          <div class="evidence-item" style="margin-top:10px">
+            <div class="evidence-key">Side effects</div>
+            <div class="evidence-value" id="sideEffectValue">none</div>
+          </div>
+          <div class="evidence-item" style="margin-top:10px">
+            <div class="evidence-key">Data classes</div>
+            <div class="evidence-value" id="dataClassValue">customer, billing</div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="traceTitle">
+          <div class="panel-header">
+            <div>
+              <div class="eyebrow">Trace log</div>
+              <div class="panel-title" id="traceTitle">Structured run events</div>
+              <div class="panel-subtitle"><span id="traceCount">0</span> events captured</div>
+            </div>
+          </div>
+          <div class="trace-log" id="traceLog"></div>
+        </section>
+      </aside>
+    </section>
+  </main>
+</div>
+
+<script>
+const STEPS = [
+  { id: "agent_invoked", label: "AI agent invoked with intent", kind: "agent", output: "invocation", policy: "agent-approved-scope", sideEffects: "read_only" },
+  { id: "read_customer_context", label: "Read limited customer context", kind: "tool", output: "customer", policy: "customer-data-access-policy", sideEffects: "read_only" },
+  { id: "check_plan_eligibility", label: "Check plan eligibility", kind: "tool", output: "eligibility", policy: "customer-data-access-policy", sideEffects: "read_only", skipFor: ["D"] },
+  { id: "eligibility_gate", label: "Evaluate eligibility gate", kind: "policy", output: "eligibilityDecision", policy: "high-risk-action-policy", sideEffects: "read_only", skipFor: ["D"] },
+  { id: "calculate_price_delta", label: "Calculate price delta", kind: "tool", output: "priceDelta", policy: "consent-required-policy", sideEffects: "read_only", skipFor: ["D"] },
+  { id: "customer_confirmation", label: "Capture customer confirmation", kind: "human", output: "confirmation", policy: "consent-required-policy", sideEffects: "read_only", skipFor: ["D"] },
+  { id: "impact_gate", label: "Assess commercial impact gate", kind: "policy", output: "impactDecision", policy: "high-risk-action-policy", sideEffects: "read_only", skipFor: ["D"] },
+  { id: "team_lead_approval", label: "Team lead approval interrupt", kind: "human", output: "approval", policy: "high-risk-action-policy", optional: true, sideEffects: "read_only" },
+  { id: "prepare_change_request", label: "Prepare change request", kind: "tool", output: "changeRequest", policy: "high-risk-action-policy", sideEffects: "reversible_write", skipFor: ["D"] },
+  { id: "execute_order", label: "Execute order request", kind: "tool", output: "orderExecution", policy: "order-execution-policy", optional: true, sideEffects: "reversible_write", scenario: "C" },
+  { id: "debug_skill_approval", label: "Approve debug skill invocation", kind: "human", output: "debugSkillApproval", policy: "break-glass-skill-policy", optional: true, sideEffects: "read_only", scenario: "C" },
+  { id: "debug_order_error", label: "Invoke Debug Errors skill", kind: "skill", output: "debugFindings", policy: "break-glass-skill-policy", optional: true, sideEffects: "read_only", scenario: "C" },
+  { id: "data_fix_approval", label: "Approve proposed data fix", kind: "human", output: "dataFixApproval", policy: "data-fix-approval-policy", optional: true, sideEffects: "read_only", scenario: "C" },
+  { id: "apply_data_fix", label: "Apply reviewed data fix", kind: "tool", output: "dataFix", policy: "data-fix-approval-policy", optional: true, sideEffects: "reversible_write", scenario: "C" },
+  { id: "retry_order_execution", label: "Retry order execution", kind: "tool", output: "orderRetry", policy: "order-execution-policy", optional: true, sideEffects: "reversible_write", scenario: "C" },
+  { id: "classify_plan_challenge", label: "Classify plan-change challenge", kind: "skill", output: "challenge", policy: "complaint-intake-policy", optional: true, sideEffects: "read_only", scenario: "D" },
+  { id: "invoke_iphone_refund_skill", label: "Invoke iPhone refund skill", kind: "skill", output: "refundSkill", policy: "skill-certification-policy", optional: true, sideEffects: "read_only", scenario: "D", uncertified: true },
+  { id: "issue_iphone_refund", label: "Issue iPhone refund", kind: "tool", output: "refundAttempt", policy: "tool-certification-policy", optional: true, sideEffects: "irreversible_write", scenario: "D", uncertified: true },
+  { id: "block_uncertified_refund", label: "Block uncertified refund path", kind: "policy", output: "refundBlock", policy: "certification-required-policy", optional: true, sideEffects: "read_only", scenario: "D" },
+  { id: "create_audit_event", label: "Create audit event", kind: "audit", output: "audit", policy: "audit-obligation", sideEffects: "read_only" },
+];
+
+const OUTPUTS = {
+  A: {
+    customer: { customerRef: "cust-demo-001", currentPlan: "Fictional Unlimited 50", tenure: "36m" },
+    invocation: { intent: "change_customer_plan", inputs: { customerRef: "cust-demo-001", targetPlan: "Fictional Unlimited 65" } },
+    eligibility: { eligible: true, reason: "contract window allows plan change" },
+    eligibilityDecision: { decision: "allow", evidence: "eligible=true" },
+    priceDelta: { currentMonthly: 50, targetMonthly: 65, delta: 15, sideEffect: "read_only" },
+    confirmation: { confirmed: true, channel: "web", disclosure: "price delta shown" },
+    impactDecision: { decision: "allow", reason: "positive upgrade path" },
+    changeRequest: { requestId: "chg-demo-001", status: "prepared_not_submitted" },
+    audit: { eventId: "audit-demo-allow", outcome: "completed", traceId: "trace-demo-a" },
+  },
+  B: {
+    customer: { customerRef: "cust-demo-002", currentPlan: "Fictional Unlimited 50", tenure: "36m" },
+    invocation: { intent: "change_customer_plan", inputs: { customerRef: "cust-demo-002", targetPlan: "Fictional Value 20" } },
+    eligibility: { eligible: true, reason: "contract window allows plan change" },
+    eligibilityDecision: { decision: "allow", evidence: "eligible=true" },
+    priceDelta: { currentMonthly: 50, targetMonthly: 20, delta: -30, sideEffect: "read_only" },
+    confirmation: { confirmed: true, channel: "contact-centre", disclosure: "price delta shown" },
+    impactDecision: { decision: "require_approval", reason: "downgrade impact exceeds threshold" },
+    approval: { approverRole: "team_lead", status: "pending" },
+    changeRequest: { requestId: "chg-demo-002", status: "prepared_not_submitted" },
+    audit: { eventId: "audit-demo-approval", outcome: "approval_required", traceId: "trace-demo-b" },
+  },
+  C: {
+    customer: { customerRef: "cust-demo-003", currentPlan: "Fictional Unlimited 50", tenure: "18m" },
+    invocation: { intent: "change_customer_plan", inputs: { customerRef: "cust-demo-003", targetPlan: "Fictional Unlimited 65" } },
+    eligibility: { eligible: true, reason: "contract window allows plan change" },
+    eligibilityDecision: { decision: "allow", evidence: "eligible=true" },
+    priceDelta: { currentMonthly: 50, targetMonthly: 65, delta: 15, sideEffect: "read_only" },
+    confirmation: { confirmed: true, channel: "contact-centre", disclosure: "price delta shown" },
+    impactDecision: { decision: "allow", reason: "standard upgrade path" },
+    changeRequest: { requestId: "chg-demo-003", status: "prepared_not_submitted" },
+    orderExecution: { status: "error", code: "ORDER_DATA_MISMATCH", field: "serviceAddress.normalizedPostcode" },
+    debugSkillApproval: { approverRole: "operations_lead", status: "approved", scope: "single_trace_debug_only" },
+    debugFindings: { issue: "postcode format mismatch", rootCause: "normalization gap in fictional customer profile", confidence: "high" },
+    dataFixApproval: { approverRole: "data_steward", status: "approved", reviewedFields: ["serviceAddress.normalizedPostcode"] },
+    dataFix: { fixId: "fix-demo-001", field: "serviceAddress.normalizedPostcode", status: "applied_after_review" },
+    orderRetry: { orderId: "ord-demo-003", status: "accepted_after_data_fix" },
+    audit: { eventId: "audit-demo-debug-recovery", outcome: "completed_after_remediation", traceId: "trace-demo-c" },
+  },
+  D: {
+    customer: { customerRef: "cust-demo-004", currentPlan: "Fictional Unlimited 65", device: "Fictional iPhone", challenge: "plan change disputed" },
+    invocation: { intent: "resolve_plan_change_challenge_and_refund_device", inputs: { customerRef: "cust-demo-004", disputedAction: "plan_change", requestedRemedy: "refund_iPhone" } },
+    challenge: { type: "plan_change_challenge", requestedRemedy: "device_refund", status: "requires_governed_review" },
+    refundSkill: { skillId: "refund-iphone-device", certified: false, reason: "not registered or certified in AI Harness" },
+    refundAttempt: { toolId: "iphone-refund-issue-payment", certified: false, amountType: "device_refund", sideEffect: "irreversible_write" },
+    refundBlock: { decision: "deny", reason: "skill_and_tool_not_ai_harness_certified", requiredAction: "register_certify_and_review_before_use" },
+    audit: { eventId: "audit-demo-uncertified-refund-blocked", outcome: "blocked_uncertified_skill_tool", traceId: "trace-demo-d" },
+  },
+};
+
+let state = initialState();
+
+function initialState() {
+  return {
+    running: false,
+    scenario: null,
+    stepStates: {},
+    context: {},
+    traceCount: 0,
+    activeStep: null,
+    approvalResolve: null,
+    rejected: false,
+    traceId: null,
+    latestDecision: "not evaluated",
+    latestSideEffect: "none",
+    pendingApproval: null,
+    agentCertified: false,
+    confidence: "not started",
+    skillsUsed: [],
+    toolsUsed: [],
+  };
+}
+
+function escapeHtml(value) {
+  const entities = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  };
+  return String(value).replace(/[&<>"']/g, (char) => entities[char]);
+}
+
+function summarize(value, length = 88) {
+  const text = typeof value === "string" ? value : JSON.stringify(value);
+  return text.length > length ? text.slice(0, length - 1) + "..." : text;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function kindChip(kind) {
+  const map = {
+    agent: "cyan",
+    tool: "cyan",
+    policy: "violet",
+    human: "amber",
+    skill: "violet",
+    audit: "green",
+  };
+  const label = kind === "human" ? "approval" : kind;
+  return `<span class="chip ${map[kind] || ""}">${escapeHtml(label)}</span>`;
+}
+
+function bpmnType(step, index, visibleSteps) {
+  if (index === 0) return "start";
+  if (index === visibleSteps.length - 1) return "end";
+  if (step.kind === "policy") return "gateway";
+  if (step.kind === "human") return "human";
+  return "task";
+}
+
+function renderBpmn() {
+  const flow = document.getElementById("bpmnFlow");
+  const visibleSteps = STEPS.filter((step) => isStepVisible(step));
+  flow.innerHTML = visibleSteps.map((step, index) => {
+    const status = state.stepStates[step.id] || "pending";
+    const type = bpmnType(step, index, visibleSteps);
+    const statusLabel = status === "pending" ? step.kind : status;
+    return `
+      <div class="bpmn-node ${type} ${status}">
+        <div class="bpmn-kind">${escapeHtml(type === "gateway" ? "gateway" : step.kind)}</div>
+        <div class="bpmn-label">${escapeHtml(step.label)}</div>
+        <div class="bpmn-status">${escapeHtml(statusLabel)}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function isStepVisible(step) {
+  if (!step.optional) return true;
+  if (step.scenario && step.scenario === state.scenario) return true;
+  return Boolean(state.stepStates[step.id]);
+}
+
+function stepInitial(step, index) {
+  if (state.stepStates[step.id] === "active") return "RUN";
+  if (state.stepStates[step.id] === "done") return "OK";
+  if (state.stepStates[step.id] === "parked") return "HIL";
+  if (state.stepStates[step.id] === "failed") return "NO";
+  if (state.stepStates[step.id] === "compensated") return "CMP";
+  return String(index + 1).padStart(2, "0");
+}
+
+function renderSteps() {
+  const list = document.getElementById("stepList");
+  const visibleSteps = STEPS.filter((step) => isStepVisible(step));
+  list.innerHTML = visibleSteps.map((step, index) => {
+    const status = state.stepStates[step.id] || "pending";
+    const rowClass = ["active", "done", "parked", "failed", "compensated"].includes(status) ? status : "";
+    const output = step.output ? state.context[step.output] : null;
+    const outputHtml = output
+      ? `<div class="step-output">${escapeHtml(step.output)}: ${escapeHtml(summarize(output))}</div>`
+      : `<div class="step-meta">${escapeHtml(step.policy)} / ${escapeHtml(step.sideEffects)}</div>`;
+
+    return `
+      <div class="step ${rowClass}">
+        <div class="step-icon ${status === "active" ? "pulse" : ""}">${stepInitial(step, index)}</div>
+        <div>
+          <div class="step-name">${escapeHtml(step.label)}</div>
+          ${outputHtml}
+        </div>
+        ${kindChip(step.kind)}
+      </div>
+    `;
+  }).join("");
+  renderBpmn();
+}
+
+function renderContext() {
+  const grid = document.getElementById("ctxGrid");
+  const entries = Object.entries(state.context);
+  if (!entries.length) {
+    grid.innerHTML = '<div class="empty">No run context captured yet.</div>';
+    return;
+  }
+
+  grid.innerHTML = entries.map(([key, value]) => `
+    <div class="context-item">
+      <div class="context-key">${escapeHtml(key)}</div>
+      <div class="context-value" title="${escapeHtml(JSON.stringify(value))}">${escapeHtml(summarize(value, 120))}</div>
+    </div>
+  `).join("");
+}
+
+function renderEvidence() {
+  document.getElementById("decisionValue").textContent = state.latestDecision;
+  document.getElementById("sideEffectValue").textContent = state.latestSideEffect;
+  document.getElementById("traceIdChip").textContent = state.traceId ? `trace: ${state.traceId}` : "trace: not started";
+  document.getElementById("currentStepChip").textContent = state.activeStep ? `active: ${state.activeStep}` : "no active step";
+  renderExecutionSummary();
+}
+
+function renderExecutionSummary() {
+  document.getElementById("agentSummary").textContent = state.scenario
+    ? "customer-service-agent / intent: change_customer_plan"
+    : "not invoked";
+  document.getElementById("certifiedSummary").innerHTML = state.scenario
+    ? '<span class="chip green">AI Harness Certified</span>'
+    : '<span class="chip">not evaluated</span>';
+  document.getElementById("confidenceSummary").innerHTML = confidenceChip(state.confidence);
+  document.getElementById("skillsUsed").innerHTML = chipsOrEmpty(state.skillsUsed);
+  document.getElementById("toolsUsed").innerHTML = chipsOrEmpty(state.toolsUsed);
+}
+
+function confidenceChip(confidence) {
+  if (confidence === "High") return '<span class="chip green">High</span>';
+  if (confidence === "Low") return '<span class="chip red">Low</span>';
+  if (confidence === "Recovering") return '<span class="chip amber">Recovering</span>';
+  return '<span class="chip">not started</span>';
+}
+
+function chipsOrEmpty(items) {
+  if (!items.length) return '<span class="chip">none yet</span>';
+  return items.map((item) => {
+    if (typeof item === "string") return `<span class="chip">${escapeHtml(item)}</span>`;
+    const css = item.certified ? "green" : "red";
+    const label = item.certified ? "certified" : "not certified";
+    return `<span class="chip ${css}">${escapeHtml(item.name)} / ${label}</span>`;
+  }).join("");
+}
+
+function addUsage(collection, item) {
+  if (!state[collection].some((existing) => existing.name === item.name)) {
+    state[collection].push(item);
+  }
+}
+
+function rememberUsage(step) {
+  const skillMap = {
+    agent_invoked: { name: "customer-change-plan", certified: true },
+    debug_order_error: { name: "debug-errors", certified: true },
+    classify_plan_challenge: { name: "plan-change-challenge-classifier", certified: true },
+    invoke_iphone_refund_skill: { name: "refund-iphone-device", certified: false },
+  };
+  const toolMap = {
+    read_customer_context: { name: "customer-profile-read", certified: true },
+    check_plan_eligibility: { name: "eligibility-check-plan-change", certified: true },
+    calculate_price_delta: { name: "billing-calculate-price-delta", certified: true },
+    prepare_change_request: { name: "order-prepare-change-request", certified: true },
+    execute_order: { name: "order-execute-change-request", certified: true },
+    apply_data_fix: { name: "customer-data-fix-apply", certified: true },
+    retry_order_execution: { name: "order-execute-change-request", certified: true },
+    issue_iphone_refund: { name: "iphone-refund-issue-payment", certified: false },
+  };
+  if (skillMap[step.id]) addUsage("skillsUsed", skillMap[step.id]);
+  if (toolMap[step.id]) addUsage("toolsUsed", toolMap[step.id]);
+}
+
+function setStatus(status, label) {
+  const badge = document.getElementById("statusBadge");
+  badge.className = `status ${status}`;
+  badge.textContent = label;
+}
+
+function setScenarioActive(scenario) {
+  document.getElementById("scenarioA").classList.toggle("active", scenario === "A");
+  document.getElementById("scenarioB").classList.toggle("active", scenario === "B");
+  document.getElementById("scenarioC").classList.toggle("active", scenario === "C");
+  document.getElementById("scenarioD").classList.toggle("active", scenario === "D");
+}
+
+function setButtons(disabled) {
+  ["scenarioA", "scenarioB", "scenarioC", "scenarioD", "btnRunA", "btnRunB", "btnRunC", "btnRunD"].forEach((id) => {
+    document.getElementById(id).disabled = disabled;
+  });
+}
+
+function setStepState(id, status) {
+  state.stepStates[id] = status;
+  state.activeStep = status === "active" ? id : null;
+  renderSteps();
+  renderEvidence();
+}
+
+function addTrace(message, type = "") {
+  state.traceCount += 1;
+  document.getElementById("traceCount").textContent = String(state.traceCount);
+  const log = document.getElementById("traceLog");
+  if (log.querySelector(".empty")) log.innerHTML = "";
+  const row = document.createElement("div");
+  row.className = `trace-row ${type}`;
+  row.textContent = `${new Date().toISOString().slice(11, 19)}  ${message}`;
+  log.appendChild(row);
+  log.scrollTop = log.scrollHeight;
+}
+
+function seedRegistryCounts() {
+  document.getElementById("agentCount").textContent = "1";
+  document.getElementById("skillCount").textContent = "3";
+  document.getElementById("toolCount").textContent = "4";
+  document.getElementById("policyCount").textContent = "3";
+}
+
+async function runScenario(scenario) {
+  if (state.running) return;
+
+  setButtons(true);
+  setScenarioActive(scenario);
+  document.getElementById("btnReset").style.display = "none";
+  document.getElementById("traceLog").innerHTML = "";
+  document.getElementById("approvalBox").classList.remove("visible");
+
+  const traceId = scenario === "A" ? "trace-demo-a" : scenario === "B" ? "trace-demo-b" : scenario === "C" ? "trace-demo-c" : "trace-demo-d";
+  state = {
+    ...initialState(),
+    running: true,
+    scenario,
+    traceId,
+    agentCertified: true,
+    confidence: "High",
+    context: {
+      workflowId: "telco-change-plan",
+      agentId: "customer-service-agent",
+      skillId: scenario === "D" ? "plan-change-challenge-classifier" : "customer-change-plan",
+      requester: scenario === "A" ? "fictional-web-user" : "fictional-service-representative",
+      requestedPlan: scenario === "B" ? "Fictional Value 20" : "Fictional Unlimited 65",
+      requestedAction: scenario === "D" ? "refund_iPhone_after_plan_change_challenge" : "change_customer_plan",
+    },
+  };
+
+  seedRegistryCounts();
+  renderContext();
+  renderEvidence();
+  setStatus("running", "Running");
+  addTrace(`workflow.started scenario=${scenario} trace=${traceId}`, "highlight");
+
+  const outputs = OUTPUTS[scenario];
+
+  for (const step of STEPS) {
+    if (step.skipFor && step.skipFor.includes(scenario)) continue;
+    if (step.optional) {
+      const autoRecoverStep = scenario === "C" && ["execute_order", "debug_order_error", "apply_data_fix", "retry_order_execution"].includes(step.id);
+      const autoBlockStep = scenario === "D" && ["classify_plan_challenge", "invoke_iphone_refund_skill", "issue_iphone_refund", "block_uncertified_refund"].includes(step.id);
+      if (autoBlockStep && step.id === "block_uncertified_refund" && !state.stepStates.issue_iphone_refund) continue;
+      if (autoBlockStep) {
+        // Continue below.
+      } else
+      if (!autoRecoverStep) continue;
+    }
+
+    setStepState(step.id, "active");
+    rememberUsage(step);
+    state.latestDecision = step.kind === "policy" ? "evaluating" : "allow";
+    state.latestSideEffect = step.sideEffects;
+    renderEvidence();
+    addTrace(`step.started ${step.id}`, "highlight");
+    await sleep(520);
+    addTrace(`policy.checked ${step.policy} decision=${state.latestDecision === "evaluating" ? "allow" : state.latestDecision}`);
+    await sleep(360);
+
+    if (step.id === "impact_gate" && scenario === "B") {
+      state.context[step.output] = outputs[step.output];
+      state.latestDecision = "require_approval";
+      renderContext();
+      renderEvidence();
+      addTrace("policy.decision require_approval reason=commercial_impact_threshold", "warn");
+      setStepState(step.id, "done");
+      await sleep(280);
+      await requestApproval({
+        stepId: "team_lead_approval",
+        outputKey: "approval",
+        context: OUTPUTS.B.approval,
+        prompt: "The requested downgrade has a fictional commercial impact that requires a team lead approval before the change request can be prepared.",
+        traceMessage: "workflow.parked human_approval_required",
+        role: "team_lead",
+      });
+      if (state.rejected) break;
+      continue;
+    }
+
+    if (step.id === "execute_order" && scenario === "C") {
+      state.context[step.output] = outputs[step.output];
+      state.latestDecision = "allow";
+      state.latestSideEffect = step.sideEffects;
+      state.confidence = "Low";
+      renderContext();
+      renderEvidence();
+      addTrace("tool.error order_execution code=ORDER_DATA_MISMATCH", "err");
+      setStepState(step.id, "failed");
+      await sleep(280);
+      await requestApproval({
+        stepId: "debug_skill_approval",
+        outputKey: "debugSkillApproval",
+        context: outputs.debugSkillApproval,
+        prompt: "Order execution failed with a data mismatch. The agent is requesting permission to invoke the Debug Errors skill, which is not part of its normal approved skill set. Approve a single-trace debug invocation?",
+        traceMessage: "workflow.parked unapproved_debug_skill_requires_human_approval",
+        role: "operations_lead",
+      });
+      if (state.rejected) break;
+      continue;
+    }
+
+    if (step.id === "invoke_iphone_refund_skill" && scenario === "D") {
+      state.context[step.output] = outputs[step.output];
+      state.latestDecision = "deny";
+      state.latestSideEffect = "read_only";
+      state.confidence = "Low";
+      renderContext();
+      renderEvidence();
+      addTrace("skill.certification_failed skill=refund-iphone-device", "err");
+      setStepState(step.id, "failed");
+      await sleep(280);
+      continue;
+    }
+
+    if (step.id === "issue_iphone_refund" && scenario === "D") {
+      state.context[step.output] = outputs[step.output];
+      state.latestDecision = "deny";
+      state.latestSideEffect = "irreversible_write";
+      state.confidence = "Low";
+      renderContext();
+      renderEvidence();
+      addTrace("tool.certification_failed tool=iphone-refund-issue-payment", "err");
+      addTrace("policy.blocked uncertified_skill_and_tool irreversible_refund", "err");
+      setStepState(step.id, "failed");
+      await sleep(280);
+      continue;
+    }
+
+    if (step.output && outputs[step.output]) {
+      state.context[step.output] = outputs[step.output];
+      state.latestDecision = outputs[step.output].decision || "allow";
+      if (scenario === "C" && step.id === "debug_order_error") state.confidence = "Recovering";
+      if (scenario === "C" && step.id === "apply_data_fix") state.confidence = "High";
+      if (scenario === "D" && step.id === "block_uncertified_refund") state.confidence = "Low";
+      renderContext();
+      renderEvidence();
+    }
+
+    addTrace(`step.completed ${step.id}`);
+    setStepState(step.id, "done");
+
+    if (step.id === "debug_order_error" && scenario === "C") {
+      addTrace("skill.finding data_issue_detected field=serviceAddress.normalizedPostcode", "warn");
+      await sleep(280);
+      await requestApproval({
+        stepId: "data_fix_approval",
+        outputKey: "dataFixApproval",
+        context: outputs.dataFixApproval,
+        prompt: "The Debug Errors skill found a fictional customer data issue and proposed a reversible data fix. A human data steward must validate the fix before the data-fix tool can run.",
+        traceMessage: "workflow.parked data_fix_tool_requires_review",
+        role: "data_steward",
+      });
+      if (state.rejected) break;
+    }
+
+    await sleep(260);
+  }
+
+  if (!state.rejected) {
+    state.running = false;
+    setStatus(scenario === "D" ? "failed" : "completed", scenario === "D" ? "Blocked" : "Completed");
+    state.latestDecision = scenario === "D" ? "deny" : scenario === "B" || scenario === "C" ? "allow after approval" : "allow";
+    state.latestSideEffect = scenario === "D" ? "blocked_irreversible_write" : "reversible_write";
+    renderEvidence();
+    addTrace(scenario === "D" ? "workflow.blocked audit_event_written" : "workflow.completed audit_event_written", scenario === "D" ? "err" : "highlight");
+  }
+
+  document.getElementById("btnReset").style.display = "";
+}
+
+async function requestApproval(config) {
+  setStatus("parked", "Approval required");
+  state.pendingApproval = config;
+  state.stepStates[config.stepId] = "parked";
+  const approvalStep = STEPS.find((step) => step.id === config.stepId);
+  if (approvalStep) rememberUsage(approvalStep);
+  state.context[config.outputKey] = { ...config.context, status: "pending" };
+  state.latestDecision = "require_approval";
+  state.latestSideEffect = "read_only";
+  renderSteps();
+  renderContext();
+  renderEvidence();
+  addTrace(config.traceMessage, "warn");
+  document.getElementById("approvalPrompt").textContent = config.prompt;
+  document.getElementById("approvalBox").classList.add("visible");
+  return new Promise((resolve) => {
+    state.approvalResolve = resolve;
+  });
+}
+
+async function handleApproval(approved) {
+  document.getElementById("approvalBox").classList.remove("visible");
+  const approval = state.pendingApproval || {
+    stepId: "team_lead_approval",
+    outputKey: "approval",
+    role: "team_lead",
+    context: {},
+  };
+  state.stepStates[approval.stepId] = approved ? "done" : "failed";
+  state.context[approval.outputKey] = {
+    ...approval.context,
+    approverRole: approval.role,
+    status: approved ? "approved" : "rejected",
+    evidence: approved ? "approval captured in trace" : "rejection captured in trace",
+  };
+  renderSteps();
+  renderContext();
+
+  if (!approved) {
+    addTrace(`approval.rejected role=${approval.role}`, "err");
+    setStatus("failed", "Rejected");
+    state.latestDecision = "deny";
+    state.latestSideEffect = "none";
+    state.confidence = "Low";
+    state.context.audit = { eventId: "audit-demo-deny", outcome: "blocked", traceId: state.traceId, blockedStep: approval.stepId };
+    state.rejected = true;
+    state.running = false;
+    renderContext();
+    renderEvidence();
+    addTrace("workflow.blocked audit_event_written", "err");
+    document.getElementById("btnReset").style.display = "";
+    if (state.approvalResolve) state.approvalResolve();
+    return;
+  }
+
+  addTrace(`approval.approved role=${approval.role} step=${approval.stepId}`, "highlight");
+  setStatus("running", "Running");
+  state.latestDecision = "allow after approval";
+  if (approval.stepId === "debug_skill_approval") state.confidence = "Recovering";
+  if (approval.stepId === "data_fix_approval") state.confidence = "High";
+  state.pendingApproval = null;
+  renderEvidence();
+  if (state.approvalResolve) state.approvalResolve();
+}
+
+function reset() {
+  state = initialState();
+  setButtons(false);
+  setScenarioActive(null);
+  setStatus("", "Idle");
+  ["agentCount", "skillCount", "toolCount", "policyCount", "traceCount"].forEach((id) => {
+    document.getElementById(id).textContent = "0";
+  });
+  document.getElementById("btnReset").style.display = "none";
+  document.getElementById("approvalBox").classList.remove("visible");
+  document.getElementById("traceLog").innerHTML = '<div class="empty">Awaiting a run.</div>';
+  document.getElementById("ctxGrid").innerHTML = '<div class="empty">No run context captured yet.</div>';
+  renderSteps();
+  renderEvidence();
+}
+
+reset();
+</script>
+</body>
+</html>

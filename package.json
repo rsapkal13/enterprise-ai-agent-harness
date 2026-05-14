@@ -9,7 +9,7 @@
     "validate:examples": "node scripts/validate-examples.js",
     "validate:references": "node scripts/validate-references.js",
     "validate": "npm run validate:schemas && npm run validate:examples && npm run validate:references",
-    "test": "node --test packages/core/tests/loader.test.js packages/registries/tests/in-memory-registry.test.js packages/tool-gateway/tests/mock-adapter.test.js packages/workflow-engine/tests/in-memory-workflow-engine.test.js",
+    "test": "node --test 'packages/*/tests/*.test.js'",
     "demo:telco": "node apps/demo-runner/src/telco-demo.js"
   },
   "devDependencies": {
