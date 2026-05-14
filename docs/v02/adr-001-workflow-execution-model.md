@@ -23,7 +23,7 @@ These decisions shape the testability, debuggability, and upgrade path of the en
 ### Options Considered
 
 **Option A — Orchestration (centralised runner)**  
-A single `WorkflowRunner` class drives step execution. It knows the full `WorkflowDefinition`, calls each step in order, manages state transitions, invokes PolicyEngine, and handles compensation. All logic lives in one place.
+A single `WorkflowRunner` class drives step execution. It knows the full `WorkflowDefinition`, calls each step in order, manages state transitions, invokes PolicyEngine, and handles compensation. [...]
 
 **Option B — Choreography (event-driven)**  
 Steps are independent event handlers. Each step listens for a "step N complete" event and emits a "step N+1 start" event. No central coordinator. Steps are decoupled by design.
@@ -34,10 +34,10 @@ Steps are independent event handlers. Each step listens for a "step N complete" 
 
 ### Rationale
 
-- **Enterprise compliance requires auditability of the full journey.** A central runner can enforce policy checkpoints at every step without relying on each independent handler to do so. With choreography, a missed event subscription silently skips a policy check.
-- **Human approval gates need a coordinator.** Pausing and resuming a workflow across an async human decision is straightforward with a central runner (park the state, resume on `approve()`). With choreography this requires a stateful saga coordinator — essentially reimplementing orchestration with more complexity.
-- **Compensation (undo) is simpler.** The runner holds the `compensationStack` and can unwind it deterministically. Choreographed compensation requires each step to know about prior steps' undo operations.
-- **Debuggability for a small team.** Transformation programs run by a small team benefit from being able to set a breakpoint in one place and trace the entire journey. Distributed event handlers scatter the execution path.
+- **Enterprise compliance requires auditability of the full journey.** A central runner can enforce policy checkpoints at every step without relying on each independent handler to do so. With choreography, it's harder to ensure centralized policy enforcement and full-journey audit trails.
+- **Human approval gates need a coordinator.** Pausing and resuming a workflow across an async human decision is straightforward with a central runner (park the state, resume on `approve()`). With choreography, coordinating long-lived human gates is more complex.
+- **Compensation (undo) is simpler.** The runner holds the `compensationStack` and can unwind it deterministically. Choreographed compensation requires each step to know about prior steps' undo operations, which increases coupling.
+- **Debuggability for a small team.** Transformation programs run by a small team benefit from being able to set a breakpoint in one place and trace the entire journey. Distributed event handlers increase the surface area for debugging.
 - **Choreography upgrade path is preserved.** The `WorkflowEngine` interface is stable. In v0.3+, the orchestrator can publish to an event bus internally while keeping the same external contract.
 
 ### Consequences
