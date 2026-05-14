@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentHarness Governance Dashboard</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #060a12;
+  --panel: rgba(15, 23, 42, 0.86);
+  --panel-2: rgba(20, 31, 52, 0.92);
+  --panel-3: rgba(7, 11, 18, 0.48);
+  --border: rgba(148, 163, 184, 0.18);
+  --border-strong: rgba(125, 211, 252, 0.35);
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --soft: #cbd5e1;
+  --cyan: #38bdf8;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --violet: #8b5cf6;
+  --shadow: 0 26px 90px rgba(0, 0, 0, 0.42);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(56, 189, 248, 0.18), transparent 34rem),
+    radial-gradient(circle at 88% 12%, rgba(139, 92, 246, 0.16), transparent 34rem),
+    linear-gradient(180deg, #07101d 0%, #060a12 54%, #04060b 100%);
+}
+
+button, input, select { font: inherit; }
+
+.app {
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: 280px minmax(0, 1fr);
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  border-right: 1px solid var(--border);
+  background: rgba(7, 11, 18, 0.72);
+  backdrop-filter: blur(18px);
+  padding: 18px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.mark {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 10px;
+  color: #06111e;
+  background: linear-gradient(135deg, #7dd3fc, #38bdf8 45%, #8b5cf6);
+  box-shadow: 0 0 34px rgba(56, 189, 248, 0.32);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 900;
+}
+
+.brand-title {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.brand-subtitle {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.nav {
+  display: grid;
+  gap: 7px;
+  margin-top: 18px;
+}
+
+.nav button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 11px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 740;
+  text-align: left;
+}
+
+.nav button:hover,
+.nav button.active {
+  color: var(--text);
+  border-color: var(--border);
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.count {
+  min-width: 26px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: var(--soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  text-align: center;
+}
+
+.sidebar-note {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  left: 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 13px;
+  color: var(--muted);
+  background: rgba(15, 23, 42, 0.58);
+  font-size: 12px;
+}
+
+.main {
+  min-width: 0;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(6, 10, 18, 0.74);
+  padding: 16px 24px;
+  backdrop-filter: blur(18px);
+}
+
+.search {
+  width: min(460px, 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: var(--text);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 13px;
+  color: var(--text);
+  background: rgba(15, 23, 42, 0.82);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.btn:hover {
+  border-color: var(--border-strong);
+  background: rgba(30, 41, 59, 0.92);
+}
+
+.btn-primary {
+  border-color: rgba(56, 189, 248, 0.55);
+  color: #06111e;
+  background: linear-gradient(135deg, #7dd3fc, #38bdf8);
+}
+
+.content {
+  max-width: 1480px;
+  padding: 28px 24px 44px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.hero-card,
+.panel,
+.detail {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.68));
+  box-shadow: var(--shadow);
+}
+
+.hero-card {
+  padding: 28px;
+}
+
+.eyebrow {
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+h1 {
+  max-width: 780px;
+  margin: 12px 0 0;
+  font-size: clamp(34px, 4vw, 58px);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.gradient-text {
+  color: transparent;
+  background: linear-gradient(90deg, #f8fafc 0%, #7dd3fc 46%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.hero-card p {
+  max-width: 760px;
+  color: var(--soft);
+  font-size: 16px;
+}
+
+.release-card {
+  padding: 20px;
+}
+
+.release-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.release-list {
+  display: grid;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.release-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(7, 11, 18, 0.32);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.kpi {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.74);
+}
+
+.kpi-value {
+  font-size: 34px;
+  font-weight: 830;
+  letter-spacing: -0.055em;
+}
+
+.kpi-label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.kpi-note {
+  margin-top: 10px;
+  color: var(--cyan);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 430px;
+  gap: 18px;
+}
+
+.panel {
+  overflow: hidden;
+}
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  padding: 18px;
+}
+
+.panel-title {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.panel-subtitle {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid var(--border);
+  padding: 13px 16px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  color: var(--muted);
+  background: rgba(7, 11, 18, 0.34);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.table tr {
+  cursor: pointer;
+}
+
+.table tr:hover,
+.table tr.selected {
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.object-id {
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.object-name {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 8px;
+  color: var(--soft);
+  background: rgba(15, 23, 42, 0.78);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.chip.green { color: #bbf7d0; border-color: rgba(34, 197, 94, 0.28); background: rgba(34, 197, 94, 0.1); }
+.chip.amber { color: #fde68a; border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.1); }
+.chip.red { color: #fecaca; border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1); }
+.chip.cyan { color: #bae6fd; border-color: rgba(56, 189, 248, 0.3); background: rgba(14, 165, 233, 0.1); }
+.chip.violet { color: #ddd6fe; border-color: rgba(139, 92, 246, 0.3); background: rgba(139, 92, 246, 0.11); }
+
+.detail {
+  position: sticky;
+  top: 84px;
+  max-height: calc(100vh - 110px);
+  overflow: auto;
+}
+
+.detail-body {
+  padding: 18px;
+}
+
+.detail h2 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 12px 0 18px;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  padding: 11px 0;
+}
+
+.kv-key {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kv-value {
+  color: var(--soft);
+  font-size: 13px;
+}
+
+.list {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+}
+
+.queue-item,
+.audit-item,
+.journey-step {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 13px;
+  background: rgba(7, 11, 18, 0.34);
+}
+
+.queue-top,
+.audit-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.item-title {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.item-copy {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.flow {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 18px;
+}
+
+.journey-step {
+  min-width: 156px;
+  position: relative;
+}
+
+.journey-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -11px;
+  width: 11px;
+  height: 1px;
+  background: var(--border-strong);
+}
+
+.footer-note {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 1180px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+  .sidebar-note { position: static; margin-top: 18px; }
+  .hero, .layout { grid-template-columns: 1fr; }
+  .detail { position: static; max-height: none; }
+}
+
+@media (max-width: 760px) {
+  .grid { grid-template-columns: 1fr 1fr; }
+  .topbar { align-items: stretch; flex-direction: column; }
+  .table { min-width: 760px; }
+  .panel { overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">AH</div>
+      <div>
+        <div class="brand-title">AgentHarness</div>
+        <div class="brand-subtitle">Governance Dashboard</div>
+      </div>
+    </div>
+    <div class="eyebrow">v0.2 prototype</div>
+    <nav class="nav" aria-label="Dashboard sections" id="nav"></nav>
+    <div class="sidebar-note">
+      Read-only prototype using fictional telco sample data. No production runtime, private systems, or real customer data.
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <input class="search" id="search" type="search" placeholder="Search agents, skills, tools, policies, audit evidence...">
+      <div class="top-actions">
+        <button class="btn" type="button" onclick="selectSection('approvals')">Approval queue</button>
+        <button class="btn btn-primary" type="button" onclick="selectSection('registry')">Registry explorer</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="hero">
+        <div class="hero-card">
+          <div class="eyebrow">Enterprise AI control plane</div>
+          <h1>Govern AI capabilities from <span class="gradient-text">registration to audit</span>.</h1>
+          <p>
+            A read-only dashboard prototype for inspecting AgentHarness registry objects,
+            certification status, risk tiers, policy coverage, approval queues, runtime journey
+            evidence, and evaluation outcomes.
+          </p>
+        </div>
+        <div class="release-card hero-card">
+          <div class="release-title">Prototype scope</div>
+          <div class="release-list">
+            <div class="release-row"><span>Mode</span><b>Static local demo</b></div>
+            <div class="release-row"><span>Source</span><b>Fictional telco journey</b></div>
+            <div class="release-row"><span>Runtime</span><b>Read-only preview</b></div>
+            <div class="release-row"><span>Next</span><b>Connect local runtime state</b></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid" id="kpis"></section>
+
+      <section class="layout">
+        <div id="mainPanel"></div>
+        <aside class="detail" id="detailPanel"></aside>
+      </section>
+      <div class="footer-note">
+        Public demo content only. Organisation-specific thresholds, system names, production contacts, and approval rules belong outside the public repo.
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const sections = [
+  { id: "overview", label: "Governance summary" },
+  { id: "registry", label: "Registry explorer" },
+  { id: "approvals", label: "Approval queue" },
+  { id: "journeys", label: "Journey monitor" },
+  { id: "audit", label: "Audit trail" },
+  { id: "evaluations", label: "Evaluation console" },
+];
+
+const registryObjects = [
+  { type: "Agent", id: "customer-service-agent", name: "Customer Service Agent", version: "0.1.0", state: "active", risk: "T2", owner: "customer-care-platform", certified: true, coverage: "3 skills / 4 tools", description: "Fictional assisted-service agent for customer-care journeys.", links: ["customer.change_plan", "customer.check_balance", "customer.replace_sim"] },
+  { type: "Skill", id: "customer.change_plan", name: "Customer plan change", version: "0.1.0", state: "active", risk: "T2", owner: "customer-care-platform", certified: true, coverage: "3 policies", description: "Reusable business capability for preparing a customer plan-change request.", links: ["customer.read_limited_profile", "billing.calculate_price_delta", "order.prepare_plan_change_request"] },
+  { type: "Skill", id: "customer.check_balance", name: "Check customer balance", version: "0.1.0", state: "active", risk: "T1", owner: "customer-care-platform", certified: true, coverage: "1 policy", description: "Read-only balance inquiry capability.", links: ["customer.read_limited_profile"] },
+  { type: "Skill", id: "customer.replace_sim", name: "Replace SIM", version: "0.1.0", state: "approved", risk: "T2", owner: "customer-care-platform", certified: true, coverage: "human review required", description: "Bounded SIM replacement capability requiring oversight.", links: ["customer_data.access"] },
+  { type: "Tool", id: "customer.read_limited_profile", name: "Read limited profile", version: "0.1.0", state: "active", risk: "T1", owner: "customer-systems", certified: true, coverage: "read_only", description: "Governed read-only access to limited fictional customer profile data.", links: ["fictional-crm-system"] },
+  { type: "Tool", id: "eligibility.check_plan_change", name: "Check plan eligibility", version: "0.1.0", state: "active", risk: "T2", owner: "product-platform", certified: true, coverage: "read_only", description: "Checks whether a fictional customer can move to a requested plan.", links: ["fictional-product-catalogue-system"] },
+  { type: "Tool", id: "billing.calculate_price_delta", name: "Calculate price delta", version: "0.1.0", state: "active", risk: "T2", owner: "billing-platform", certified: true, coverage: "read_only", description: "Calculates fictional monthly price difference.", links: ["fictional-billing-system"] },
+  { type: "Tool", id: "order.prepare_plan_change_request", name: "Prepare plan-change request", version: "0.1.0", state: "active", risk: "T2", owner: "order-platform", certified: true, coverage: "reversible_write", description: "Prepares but does not submit a fictional change request.", links: ["fictional-order-system"] },
+  { type: "Policy", id: "customer_data.access", name: "Customer data access", version: "0.1.0", state: "active", risk: "T2", owner: "ai-governance", certified: true, coverage: "allow / deny", description: "Controls access to confidential customer context.", links: ["customer.summary", "session.context"] },
+  { type: "Policy", id: "consent.required", name: "Consent required", version: "0.1.0", state: "active", risk: "T2", owner: "ai-governance", certified: true, coverage: "require approval", description: "Requires confirmation before preparing a change request.", links: ["confirm-plan-change"] },
+  { type: "Policy", id: "high_risk.action", name: "High-risk action", version: "0.1.0", state: "active", risk: "T3", owner: "ai-governance", certified: true, coverage: "allow / require_approval / deny", description: "Escalates elevated-risk actions for review.", links: ["human_review"] },
+  { type: "Workflow", id: "customer.change_plan.workflow", name: "Customer Plan Change Workflow", version: "0.1.0", state: "active", risk: "T2", owner: "customer-care-platform", certified: true, coverage: "9 steps", description: "Coordinates eligibility, price delta, consent, approval, request preparation, and audit evidence.", links: ["audit.telco.plan_change.allowed.example"] },
+  { type: "System", id: "fictional-crm-system", name: "Fictional CRM System", version: "0.1.0", state: "active", risk: "T2", owner: "customer-systems", certified: true, coverage: "confidential data", description: "Fictional system boundary for limited customer profile context.", links: ["customer.read_limited_profile"] },
+  { type: "UI Manifest", id: "confirm-plan-change", name: "Confirm Plan Change", version: "0.1.0", state: "active", risk: "T2", owner: "experience-platform", certified: true, coverage: "customer confirmation", description: "Approved customer confirmation pattern for plan-change disclosure.", links: ["consent.required"] },
+];
+
+const approvals = [
+  { id: "appr-001", title: "High-risk plan downgrade", agent: "customer-service-agent", risk: "T2", policy: "high_risk.action", state: "Pending", age: "18m", evidence: "Price delta and eligibility evidence collected." },
+  { id: "appr-002", title: "Debug skill break-glass", agent: "customer-service-agent", risk: "T2", policy: "break-glass-skill-policy", state: "Review", age: "4m", evidence: "Order data mismatch detected in local demo runner." },
+  { id: "appr-003", title: "Data fix validation", agent: "customer-service-agent", risk: "T2", policy: "data-fix-approval-policy", state: "Pending", age: "2m", evidence: "Proposed reversible postcode normalization fix." },
+];
+
+const journeys = [
+  { id: "run-demo-a", status: "completed", workflow: "customer.change_plan.workflow", current: "complete", confidence: "High", steps: ["Agent invoked", "Read context", "Check eligibility", "Calculate price delta", "Customer confirmation", "Prepare request", "Audit"] },
+  { id: "run-demo-b", status: "approval_required", workflow: "customer.change_plan.workflow", current: "human_review", confidence: "High", steps: ["Agent invoked", "Read context", "Policy gate", "Human approval", "Prepare request", "Audit"] },
+  { id: "run-demo-c", status: "recovered", workflow: "customer.change_plan.workflow", current: "complete", confidence: "High", steps: ["Order error", "Approve debug skill", "Debug data issue", "Approve data fix", "Retry order", "Audit"] },
+  { id: "run-demo-d", status: "blocked", workflow: "refund challenge path", current: "certification-required", confidence: "Low", steps: ["Challenge classified", "Uncertified refund skill", "Uncertified refund tool", "Policy denied", "Audit"] },
+];
+
+const auditEvents = [
+  { id: "audit.telco.plan_change.allowed.example", outcome: "allowed", type: "tool_call", trace: "trace-demo-a", decision: "allow", detail: "Plan-change request prepared after consent." },
+  { id: "audit.telco.plan_change.approval_required.example", outcome: "approval_required", type: "policy_decision", trace: "trace-demo-b", decision: "require_approval", detail: "Downgrade crossed approval threshold." },
+  { id: "audit.telco.plan_change.blocked.example", outcome: "blocked", type: "policy_decision", trace: "trace-demo-d", decision: "deny", detail: "Uncertified skill and refund tool blocked." },
+];
+
+const evaluations = [
+  { id: "plan_change_eval_pack", target: "customer-service-agent", outcome: "passing", coverage: "core journeys", score: "92%" },
+  { id: "plan_change_trajectory_checks", target: "customer.change_plan.workflow", outcome: "passing", coverage: "tool / policy / approval path", score: "89%" },
+  { id: "refund_challenge_gap", target: "refund-iphone-device", outcome: "gap", coverage: "not certified", score: "0%" },
+];
+
+let activeSection = "overview";
+let selectedObject = registryObjects[0];
+
+function chip(value, tone = "") {
+  return `<span class="chip ${tone}">${escape(value)}</span>`;
+}
+
+function escape(value) {
+  const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
+  return String(value).replace(/[&<>"']/g, (char) => entities[char]);
+}
+
+function toneFor(value) {
+  const v = String(value).toLowerCase();
+  if (["active", "completed", "allowed", "allow", "passing", "high", "certified", "recovered"].includes(v)) return "green";
+  if (["approved", "approval_required", "review", "pending", "require_approval", "t2"].includes(v)) return "amber";
+  if (["blocked", "deny", "gap", "low", "not certified"].includes(v)) return "red";
+  if (["t3"].includes(v)) return "violet";
+  return "cyan";
+}
+
+function renderNav() {
+  document.getElementById("nav").innerHTML = sections.map((section) => {
+    const count = section.id === "registry" ? registryObjects.length
+      : section.id === "approvals" ? approvals.length
+      : section.id === "journeys" ? journeys.length
+      : section.id === "audit" ? auditEvents.length
+      : section.id === "evaluations" ? evaluations.length
+      : "";
+    return `<button class="${activeSection === section.id ? "active" : ""}" onclick="selectSection('${section.id}')"><span>${section.label}</span><span class="count">${count || "AH"}</span></button>`;
+  }).join("");
+}
+
+function renderKpis() {
+  const uncertified = 1;
+  const pending = approvals.filter((item) => item.state === "Pending").length;
+  document.getElementById("kpis").innerHTML = [
+    ["Registered objects", registryObjects.length, "agent, skill, tool, policy, workflow"],
+    ["Certified objects", registryObjects.filter((item) => item.certified).length, "AI Harness certified"],
+    ["Pending approvals", pending, "human-in-the-loop"],
+    ["Certification gaps", uncertified, "blocked until reviewed"],
+  ].map(([label, value, note]) => `
+    <div class="kpi">
+      <div class="kpi-value">${escape(value)}</div>
+      <div class="kpi-label">${escape(label)}</div>
+      <div class="kpi-note">${escape(note)}</div>
+    </div>
+  `).join("");
+}
+
+function selectSection(section) {
+  activeSection = section;
+  render();
+}
+
+function searchText() {
+  return document.getElementById("search").value.trim().toLowerCase();
+}
+
+function filteredRegistry() {
+  const q = searchText();
+  if (!q) return registryObjects;
+  return registryObjects.filter((item) => [item.type, item.id, item.name, item.owner, item.description].join(" ").toLowerCase().includes(q));
+}
+
+function renderRegistry() {
+  const objects = filteredRegistry();
+  return `
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="eyebrow">Registry explorer</div>
+          <div class="panel-title">Capability inventory</div>
+          <div class="panel-subtitle">Schema-aligned object list from the fictional telco sample.</div>
+        </div>
+        ${chip(`${objects.length} shown`, "cyan")}
+      </div>
+      <table class="table">
+        <thead><tr><th>Object</th><th>Type</th><th>Risk</th><th>State</th><th>Certification</th><th>Owner</th></tr></thead>
+        <tbody>
+          ${objects.map((item) => `
+            <tr class="${selectedObject.id === item.id ? "selected" : ""}" onclick="selectObject('${item.id}')">
+              <td><div class="object-id">${escape(item.id)}</div><div class="object-name">${escape(item.name)}</div></td>
+              <td>${chip(item.type, "cyan")}</td>
+              <td>${chip(item.risk, toneFor(item.risk))}</td>
+              <td>${chip(item.state, toneFor(item.state))}</td>
+              <td>${chip(item.certified ? "AI Harness Certified" : "Not Certified", item.certified ? "green" : "red")}</td>
+              <td>${escape(item.owner)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </section>
+  `;
+}
+
+function selectObject(id) {
+  selectedObject = registryObjects.find((item) => item.id === id) || selectedObject;
+  render();
+}
+
+function renderDetail() {
+  const item = selectedObject;
+  return `
+    <div class="detail-body">
+      <div class="eyebrow">${escape(item.type)} detail</div>
+      <h2>${escape(item.name)}</h2>
+      <div class="detail-meta">
+        ${chip(item.id, "cyan")}
+        ${chip(item.risk, toneFor(item.risk))}
+        ${chip(item.state, toneFor(item.state))}
+        ${chip(item.certified ? "AI Harness Certified" : "Not Certified", item.certified ? "green" : "red")}
+      </div>
+      ${kv("Version", item.version)}
+      ${kv("Owner", item.owner)}
+      ${kv("Coverage", item.coverage)}
+      ${kv("Description", item.description)}
+      ${kv("Linked objects", item.links.map((link) => chip(link)).join(" "))}
+    </div>
+  `;
+}
+
+function kv(key, value) {
+  return `<div class="kv"><div class="kv-key">${escape(key)}</div><div class="kv-value">${value}</div></div>`;
+}
+
+function renderApprovals() {
+  return `
+    <section class="panel">
+      <div class="panel-head">
+        <div><div class="eyebrow">Human-in-the-loop</div><div class="panel-title">Approval queue</div><div class="panel-subtitle">Read-only preview. Action buttons arrive after the write model is defined.</div></div>
+        ${chip("write model deferred", "amber")}
+      </div>
+      <div class="list">
+        ${approvals.map((item) => `
+          <div class="queue-item">
+            <div class="queue-top"><div class="item-title">${escape(item.title)}</div>${chip(item.state, toneFor(item.state))}</div>
+            <div class="item-copy">${escape(item.evidence)}</div>
+            <div class="detail-meta">${chip(item.agent)}${chip(item.risk, toneFor(item.risk))}${chip(item.policy)}${chip(item.age)}</div>
+          </div>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderJourneys() {
+  return `
+    <section class="panel">
+      <div class="panel-head">
+        <div><div class="eyebrow">Journey monitor</div><div class="panel-title">Recent runs</div><div class="panel-subtitle">Static traces inspired by the demo runner scenarios.</div></div>
+        ${chip("demo mode", "cyan")}
+      </div>
+      ${journeys.map((run) => `
+        <div class="queue-item" style="margin:18px">
+          <div class="queue-top"><div class="item-title">${escape(run.id)}</div>${chip(run.status, toneFor(run.status))}</div>
+          <div class="item-copy">${escape(run.workflow)} / current: ${escape(run.current)} / confidence: ${escape(run.confidence)}</div>
+          <div class="flow">${run.steps.map((step) => `<div class="journey-step"><div class="object-id">${escape(step)}</div></div>`).join("")}</div>
+        </div>
+      `).join("")}
+    </section>
+  `;
+}
+
+function renderAudit() {
+  return `
+    <section class="panel">
+      <div class="panel-head">
+        <div><div class="eyebrow">Audit trail</div><div class="panel-title">Evidence events</div><div class="panel-subtitle">Trace-linked governance evidence.</div></div>
+        ${chip("export later", "amber")}
+      </div>
+      <div class="list">
+        ${auditEvents.map((event) => `
+          <div class="audit-item">
+            <div class="audit-top"><div class="item-title">${escape(event.id)}</div>${chip(event.outcome, toneFor(event.outcome))}</div>
+            <div class="item-copy">${escape(event.detail)}</div>
+            <div class="detail-meta">${chip(event.type)}${chip(event.trace)}${chip(event.decision, toneFor(event.decision))}</div>
+          </div>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderEvaluations() {
+  return `
+    <section class="panel">
+      <div class="panel-head">
+        <div><div class="eyebrow">Evaluation console</div><div class="panel-title">Certification evidence</div><div class="panel-subtitle">Evaluation packs and known gaps.</div></div>
+        ${chip("v0.2/v0.3 signal", "cyan")}
+      </div>
+      <table class="table">
+        <thead><tr><th>Evaluation</th><th>Target</th><th>Outcome</th><th>Coverage</th><th>Score</th></tr></thead>
+        <tbody>
+          ${evaluations.map((item) => `
+            <tr>
+              <td><div class="object-id">${escape(item.id)}</div></td>
+              <td>${escape(item.target)}</td>
+              <td>${chip(item.outcome, toneFor(item.outcome))}</td>
+              <td>${escape(item.coverage)}</td>
+              <td>${escape(item.score)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </section>
+  `;
+}
+
+function renderOverview() {
+  return `
+    ${renderRegistry()}
+  `;
+}
+
+function renderMain() {
+  if (activeSection === "registry") return renderRegistry();
+  if (activeSection === "approvals") return renderApprovals();
+  if (activeSection === "journeys") return renderJourneys();
+  if (activeSection === "audit") return renderAudit();
+  if (activeSection === "evaluations") return renderEvaluations();
+  return renderOverview();
+}
+
+function render() {
+  renderNav();
+  renderKpis();
+  document.getElementById("mainPanel").innerHTML = renderMain();
+  document.getElementById("detailPanel").innerHTML = renderDetail();
+}
+
+document.getElementById("search").addEventListener("input", () => {
+  if (activeSection !== "registry" && activeSection !== "overview") activeSection = "registry";
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

@@ -10,7 +10,10 @@
     "validate:references": "node scripts/validate-references.js",
     "validate": "npm run validate:schemas && npm run validate:examples && npm run validate:references",
     "test": "node --test 'packages/*/tests/*.test.js'",
-    "demo:telco": "node apps/demo-runner/src/telco-demo.js"
+    "demo:telco": "node apps/demo-runner/src/telco-demo.js",
+    "admin:dev": "npm --prefix apps/admin-console run dev",
+    "admin:build": "npm --prefix apps/admin-console run build",
+    "admin:preview": "npm --prefix apps/admin-console run preview"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
