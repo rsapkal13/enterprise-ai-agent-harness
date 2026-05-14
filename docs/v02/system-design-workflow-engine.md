@@ -9,7 +9,7 @@
 
 ## 1. Context & Goals
 
-The enterprise-ai-harness needs a Workflow Engine that can coordinate multi-step, AI-enabled business journeys in a governed, auditable way. The canonical v0.2 use case is the **Banking Card Dispute** journey, which requires:
+The enterprise-ai-harness needs a Workflow Engine that can coordinate multi-step, AI-enabled business journeys in a governed, auditable way. The canonical v0.2 use case is the **Banking Card Dispu[...]**
 
 - Sequential and conditional step execution
 - Policy checkpoints before sensitive actions (risk classification, fund reversals)
@@ -51,7 +51,7 @@ The engine must be **synchronous-first** for v0.2 (in-process, in-memory state) 
 ## 4. High-Level Component Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────┐
 │                        WorkflowRunner                           │
 │                                                                 │
 │  start(request)                                                 │
@@ -75,7 +75,7 @@ The engine must be **synchronous-first** for v0.2 (in-process, in-memory state) 
 │  │(TraceEvent) │                   │  (in-memory     │          │
 │  └─────────────┘                   │   Map, v0.2)    │          │
 │                                    └─────────────────┘          │
-└─────────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ---
