@@ -1,16 +1,9 @@
-# Phase 4: Observability
+# Phase 4: Evaluation & Reporting
 
-Goal: record and evaluate AI-enabled business execution.
+Goal: make evaluation outcomes computable from completed journey data and produce local reports
+operators and engineers can act on.
 
-## Scope
+## What was already delivered in v0.2 (closed — no longer in scope here)
 
-- Trace events
-- Audit log records
-- Evaluation result model
-- Local reports
-- Improvement-loop documentation
-
-## Exit Criteria
-
-- A journey can be traced from agent request to outcome
-- Evaluation results can reference skills, tools, workflows, and agents
+- `TraceEmitter` — structured span emission, correlation IDs, child emitters, sink write ✅
+- `InMemoryAuditSink` — ap

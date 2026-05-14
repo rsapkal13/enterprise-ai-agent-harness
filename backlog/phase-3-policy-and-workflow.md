@@ -1,17 +1,8 @@
-# Phase 3: Policy and Workflow
+# Phase 3: Policy Execution & Context Layer
 
-Goal: make governance and workflow behavior executable.
+Goal: wire the delivered policy engine and audit sink into the workflow engine and implement the
+context layer runtime so that governance is end-to-end executable.
 
-## Scope
+## What was already delivered in v0.2 (closed — no longer in scope here)
 
-- Policy decision contract
-- Consent and approval handling
-- Workflow state transitions
-- Retry and compensation model
-- Audit obligations
-
-## Exit Criteria
-
-- High-risk actions can be paused for approval
-- Policy decisions are explainable
-- Workflow state is traceable
+- `RuleBasedPolicyEvaluator` — condition matching on subject / resource / context / risk-tier ceil

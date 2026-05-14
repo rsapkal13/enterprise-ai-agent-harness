@@ -1,54 +1,41 @@
-# Phase 5: Demo Experiences
+# Phase 5: Dashboard Phases B, C & D + Documentation Website
 
-Goal: create usable public demos after the specification and local runtime are stable.
+Goal: complete the admin console as a connected operator tool and publish a public documentation site.
+
+## What was already delivered in v0.2 (closed — no longer in scope here)
+
+- Demo runner: telco plan-change journey, two scenarios (upgrade and high-value downgrade) ✅
+- Banking card dispute end-to-end example ✅
+- Interactive demo dashboard HTML ✅
+- Admin console Phase A: static registry browser (object list, detail, filter, search, governance home) ✅
+- Admin console Phase E scaffold: approval queue UI, dependency graph ✅
+- `apps/admin-console/` — Vite/TypeScript app with dev/build/preview scripts ✅
+
+## What is being completed in v0.3 (not repeated here)
+
+- Insurance-claims example journey (Story 3.6)
+
+## What is being completed in v0.4 (not repeated here)
+
+- Retail-returns example journey with evaluation scenario (Story 4.5)
 
 ## Scope
 
-- Documentation website
-- Admin console prototype
-- Demo runner
-- Additional fictional enterprise journeys
-- Static control-plane views over registry objects
-- Website alignment with current spec and future roadmap
+### Story 5.1 — Admin console Phase B: Policy inspector
 
-## Exit Criteria
-
-- Users can inspect registries and run demo journeys locally
-- UI manifests inform user-facing screens
-- Examples remain fictional and vendor-neutral
-- Website clearly separates v0.1 specification scope from future runtime, CLI, deployment, and
-  agent-directory capabilities
-
-## Issue-Ready Stories
-
-### Story 5.1: Align Public Website With v0.1 Spec Scope
-
-As a visitor, I want the website to describe what exists today and what is future roadmap so that I
-do not mistake planned runtime capabilities for released features.
+Operators can inspect policy structure, conditions, obligations, and cross-references between
+policies and the skills/workflows that reference them.
 
 Acceptance criteria:
+- Dedicated Policies view with policies grouped by `enforcement_point` (skill_invocation, tool_call,
+  workflow_step, context_access)
+- Each policy expanded to show: `decisionType`, `applicableRiskTiers`, rules table
+  (condition → decision → obligations), evidence requirements
+- Decision type distribution donut chart (allow / deny / require_approval / require_consent)
+- Cross-reference panel: from a policy, show which skills and workflows reference it
+- From a skill detail, show which policies are evaluated (already in YAML `policies` field)
+- Clicking a cross-reference navigates to that object's detail panel
 
-- Website states that v0.1 is a specification release.
-- CLI scaffolding, Docker, Helm, runtime SDKs, and agent mesh are not presented as available
-  v0.1 capabilities.
-- Future-state items link back to public roadmap or backlog.
+Suggested labels: `area:dashboard`, `area:policy`, `type:feature`, `priority:p0`, `release:v0.5`
 
-Suggested labels: `area:website`, `type:docs`, `priority:p0`, `release:v0.1`
-
-Suggested milestone: `v0.1`
-
-### Story 5.2: Publish Schema-Aligned Telco Journey On Website
-
-As an architect, I want the website sample journey to match the repository manifests so that I can
-trace the public narrative to real files.
-
-Acceptance criteria:
-
-- Website references the same agent, skill, policies, tools, workflow, systems, evaluations, UI
-  manifest, and audit outcomes as `examples/telco-customer-care/`.
-- Website labels the journey as fictional and organisation-neutral.
-- Website avoids claims that a real system is updated.
-
-Suggested labels: `area:website`, `area:examples`, `type:docs`, `priority:p1`, `release:v0.1`
-
-Suggested milestone: `v0.1`
+Suggested m
