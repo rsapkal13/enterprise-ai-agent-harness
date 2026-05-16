@@ -110,7 +110,11 @@ export class RuleBasedPolicyEvaluator {
     const res = condition.resource;
     if (res) {
       if (res.tool_id !== undefined && res.tool_id !== request.toolId) return false;
+      if (res.skill_id !== undefined && res.skill_id !== request.skillId) return false;
+      if (res.workflow_id !== undefined && res.workflow_id !== request.workflowId) return false;
       if (Array.isArray(res.tools) && !res.tools.includes(request.toolId)) return false;
+      if (Array.isArray(res.workflows) && !res.workflows.includes(request.workflowId)) return false;
+      if (Array.isArray(res.context_scopes) && !res.context_scopes.includes(request.contextScopeId)) return false;
     }
 
     // context — flat key/value with array‐include support

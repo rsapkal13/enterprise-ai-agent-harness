@@ -23,6 +23,7 @@
 
 import { randomUUID } from "node:crypto";
 import type { WorkflowDefinition } from "../../core/src/index.js";
+import { RuleBasedPolicyEvaluator } from "../../policy-engine/src/policy-engine.js";
 import type { ToolGateway } from "../../tool-gateway/src/tool-gateway.js";
 import type { InMemoryToolRegistry, InMemoryPolicyRegistry } from "../../registries/src/in-memory-registry.js";
 import type { WorkflowEngine, WorkflowStartRequest } from "./workflow-engine.js";
@@ -74,6 +75,8 @@ export interface ExtendedWorkflowState extends WorkflowState {
   _steps: RawStep[];
   /** Initial input provided to start(). */
   _input: Record<string, unknown>;
+  /** Workflow metadata used when constructing policy evaluation context. */
+  _workflow: WorkflowDefinition;
 }
 
 // ── Engine dependencies ───────────────────────────────────────────────────────
@@ -82,14 +85,18 @@ export interface WorkflowEngineOptions {
   toolGateway: ToolGateway;
   toolRegistry: InMemoryToolRegistry;
   policyRegistry: InMemoryPolicyRegistry;
+  policyEvaluator?: RuleBasedPolicyEvaluator;
 }
 
 // ── Implementation ────────────────────────────────────────────────────────────
 
 export class InMemoryWorkflowEngine implements WorkflowEngine {
   private readonly runs = new Map<string, ExtendedWorkflowState>();
+  private readonly policyEvaluator: RuleBasedPolicyEvaluator;
 
-  constructor(private readonly opts: WorkflowEngineOptions) {}
+  constructor(private readonly opts: WorkflowEngineOptions) {
+    this.policyEvaluator = opts.policyEvaluator ?? new RuleBasedPolicyEvaluator();
+  }
 
   // ── WorkflowEngine interface ────────────────────────────────────────────────
 
@@ -114,6 +121,7 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
       history: [],
       _steps: steps,
       _input: input,
+      _workflow: workflow,
     };
 
     this.runs.set(runId, state);
@@ -320,30 +328,66 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
         output: { error: `Policy "${step.policy_ref}" not found in registry` },
         executedAt: new Date().toISOString(),
       });
+      if (!step.on_failure || step.on_failure === "stop") {
+        state.status = "failed";
+      }
       return step.on_failure ?? "stop";
     }
 
-    // In the v0.2 demo runtime the policy engine always allows. The
-    // high_risk.action policy will trigger require_approval in a future
-    // release when the full policy evaluator is implemented.
-    const decision =
-      policy.decisionType === "deny" ? "denied" : "completed";
-
-    state.stepOutputs[step.id] = {
-      policy_id: policy.id,
-      decision,
-      evaluated_at: new Date().toISOString(),
+    const decision = await this.policyEvaluator.evaluate(
+      policy,
+      this.policyRequest(state, step, policy),
+    );
+    const output = {
+      policy_id: decision.policyId,
+      decision: decision.outcome,
+      reason: decision.reason,
+      obligations: decision.obligations,
+      evaluated_at: decision.evaluatedAt,
     };
+    state.stepOutputs[step.id] = output;
+
+    if (decision.outcome === "allow") {
+      state.history.push({
+        stepId: step.id,
+        type: "policy",
+        outcome: "completed",
+        output,
+        executedAt: decision.evaluatedAt,
+      });
+      return step.on_success;
+    }
+
+    if (decision.outcome === "require_approval") {
+      state.history.push({
+        stepId: step.id,
+        type: "policy",
+        outcome: "waiting",
+        output,
+        executedAt: decision.evaluatedAt,
+      });
+      await this.executeApprovalStep(state, {
+        ...step,
+        approval: {
+          ...(step.approval ?? {}),
+          approver_role: step.approval?.approver_role ?? "policy-reviewer",
+        },
+      });
+      state.stepOutputs[step.id] = { ...state.stepOutputs[step.id], ...output };
+      return undefined;
+    }
 
     state.history.push({
       stepId: step.id,
       type: "policy",
-      outcome: decision === "denied" ? "denied" : "completed",
-      output: state.stepOutputs[step.id]!,
-      executedAt: new Date().toISOString(),
+      outcome: "denied",
+      output,
+      executedAt: decision.evaluatedAt,
     });
-
-    return decision === "denied" ? (step.on_failure ?? "stop") : step.on_success;
+    if (!step.on_failure || step.on_failure === "stop") {
+      state.status = "failed";
+    }
+    return step.on_failure ?? "stop";
   }
 
   private async executeApprovalStep(
@@ -396,6 +440,40 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
       } else {
         Object.assign(merged, priorOutput);
       }
+    }
+
+    return merged;
+  }
+
+  private policyRequest(
+    state: ExtendedWorkflowState,
+    step: RawStep,
+    policy: Record<string, any>,
+  ): Record<string, unknown> {
+    const context = this.policyContext(state);
+    const scope = policy._scope ?? {};
+    return {
+      agentId: String(context.agent_id ?? context.agentId ?? scope.agents?.[0] ?? ""),
+      skillId: String(context.skill_id ?? context.skillId ?? scope.skills?.[0] ?? ""),
+      toolId: String(step.tool_ref ?? context.tool_id ?? context.toolId ?? scope.tools?.[0] ?? ""),
+      workflowId: state.workflowId,
+      contextScopeId: String(context.context_scope_id ?? context.contextScopeId ?? scope.context_scopes?.[0] ?? ""),
+      context,
+    };
+  }
+
+  private policyContext(state: ExtendedWorkflowState): Record<string, unknown> {
+    const workflow = state._workflow as WorkflowDefinition;
+    const merged: Record<string, unknown> = {
+      workflow_id: state.workflowId,
+      risk_tier: workflow._riskTier,
+      environment: workflow._environment,
+      ...state._input,
+    };
+
+    for (const [stepId, output] of Object.entries(state.stepOutputs)) {
+      merged[stepId] = output;
+      Object.assign(merged, output);
     }
 
     return merged;

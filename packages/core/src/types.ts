@@ -47,7 +47,9 @@ export interface PolicyDefinition {
   status: LifecycleStatus;
   name: string;
   decisionType: "allow" | "deny" | "require_approval" | "require_consent";
-  // TODO: Add condition expression contract.
+  _rules?: unknown[];
+  _applicableRiskTiers?: string[];
+  _scope?: Record<string, unknown>;
 }
 
 export interface WorkflowDefinition {
@@ -56,7 +58,10 @@ export interface WorkflowDefinition {
   status: LifecycleStatus;
   name: string;
   steps: string[];
-  // TODO: Replace string steps with typed workflow step definitions.
+  _rawSteps?: Array<{ id: string; [key: string]: unknown }>;
+  _owner?: string;
+  _riskTier?: string;
+  _environment?: string;
 }
 
 export interface SystemDefinition {

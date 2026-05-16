@@ -13,7 +13,7 @@
  */
 
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { readFile, readdir } from "node:fs/promises";
 import YAML from "yaml";
 
@@ -25,10 +25,12 @@ const exampleDir = path.join(repoRoot, "examples/telco-customer-care");
 
 // ── Package imports (source files, no build step needed) ──────────────────────
 
-const { loadExampleManifests } = await import(path.join(repoRoot, "packages/core/src/loader.js"));
-const { buildRegistries }      = await import(path.join(repoRoot, "packages/registries/src/in-memory-registry.js"));
-const { callMockTool }         = await import(path.join(repoRoot, "packages/tool-gateway/src/adapters/mock-adapter.js"));
-const { InMemoryWorkflowEngine } = await import(path.join(repoRoot, "packages/workflow-engine/src/in-memory-workflow-engine.js"));
+const moduleUrl = (...segments) => pathToFileURL(path.join(repoRoot, ...segments)).href;
+
+const { loadExampleManifests } = await import(moduleUrl("packages/core/src/loader.js"));
+const { buildRegistries }      = await import(moduleUrl("packages/registries/src/in-memory-registry.js"));
+const { callMockTool }         = await import(moduleUrl("packages/tool-gateway/src/adapters/mock-adapter.js"));
+const { InMemoryWorkflowEngine } = await import(moduleUrl("packages/workflow-engine/src/in-memory-workflow-engine.js"));
 
 // ── Colour helpers (no chalk dependency) ─────────────────────────────────────
 
@@ -136,7 +138,16 @@ async function main() {
 
   // 5. Start journey
   banner("Journey: change-plan for CUST-DEMO-0001 → PLAN-PREMIUM-002");
-  const input = { customer_reference: "CUST-DEMO-0001", requested_plan_id: "PLAN-PREMIUM-002" };
+  const input = {
+    customer_reference: "CUST-DEMO-0001",
+    requested_plan_id: "PLAN-PREMIUM-002",
+    agent_id: "customer-service-agent",
+    skill_id: "customer.change_plan",
+    session_purpose: "customer-care",
+    channel: "contact-center",
+    consent_present: true,
+    customer_confirmation_present: true,
+  };
   console.log(c.dim(`  Input: ${JSON.stringify(input)}\n`) + c.bold("  Steps:"));
 
   let state     = await engine.start({ workflow, input });

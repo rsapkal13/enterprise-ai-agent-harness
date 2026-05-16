@@ -82,6 +82,9 @@ interface RawPolicy {
   name: string;
   lifecycle_state: string;
   default_decision?: string;
+  rules?: unknown[];
+  applicable_risk_tiers?: string[];
+  scope?: Record<string, unknown>;
 }
 
 interface RawWorkflow {
@@ -89,6 +92,9 @@ interface RawWorkflow {
   version: string;
   name: string;
   lifecycle_state: string;
+  owner?: string;
+  risk_tier?: string;
+  environment?: string;
   steps?: Array<{ id: string; [key: string]: unknown }>;
 }
 
@@ -219,6 +225,9 @@ function mapPolicy(raw: RawPolicy): PolicyDefinition {
     name: raw.name,
     status: toLifecycleStatus(raw.lifecycle_state),
     decisionType: toPolicyDecisionType(raw.default_decision),
+    _rules: raw.rules ?? [],
+    _applicableRiskTiers: raw.applicable_risk_tiers ?? [],
+    _scope: raw.scope ?? {},
   };
 }
 
@@ -229,6 +238,10 @@ function mapWorkflow(raw: RawWorkflow): WorkflowDefinition {
     name: raw.name,
     status: toLifecycleStatus(raw.lifecycle_state),
     steps: (raw.steps ?? []).map((s) => s.id),
+    _rawSteps: raw.steps ?? [],
+    _owner: raw.owner,
+    _riskTier: raw.risk_tier,
+    _environment: raw.environment,
   };
 }
 
