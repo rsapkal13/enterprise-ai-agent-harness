@@ -96,6 +96,9 @@ function mapPolicy(raw) {
     name: raw.name,
     status: toLifecycleStatus(raw.lifecycle_state),
     decisionType: toPolicyDecisionType(raw.default_decision),
+    _rules: raw.rules ?? [],
+    _applicableRiskTiers: raw.applicable_risk_tiers ?? [],
+    _scope: raw.scope ?? {},
   };
 }
 
@@ -108,6 +111,9 @@ function mapWorkflow(raw) {
     steps: (raw.steps ?? []).map((s) => s.id),
     // Keep raw step objects for the workflow engine
     _rawSteps: raw.steps ?? [],
+    _owner: raw.owner,
+    _riskTier: raw.risk_tier,
+    _environment: raw.environment,
   };
 }
 

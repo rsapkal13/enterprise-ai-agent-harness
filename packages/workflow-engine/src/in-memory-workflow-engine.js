@@ -13,12 +13,14 @@
  */
 
 import { randomUUID } from "node:crypto";
+import { RuleBasedPolicyEvaluator } from "../../policy-engine/src/policy-engine.js";
 
 export class InMemoryWorkflowEngine {
   constructor(opts) {
     // opts: { toolGateway, toolRegistry, policyRegistry }
     this.opts = opts;
     this.runs = new Map();
+    this.policyEvaluator = opts.policyEvaluator ?? new RuleBasedPolicyEvaluator();
   }
 
   // ── Public interface ────────────────────────────────────────────────────────
@@ -38,6 +40,7 @@ export class InMemoryWorkflowEngine {
       pendingApprovalStepId: undefined,
       _steps: steps,
       _input: input,
+      _workflow: workflow,
     };
 
     this.runs.set(runId, state);
@@ -170,20 +173,44 @@ export class InMemoryWorkflowEngine {
     if (!policy) {
       state.history.push({ stepId: step.id, type: "policy", outcome: "failed",
         output: { error: `Policy "${step.policy_ref}" not found` }, executedAt: new Date().toISOString() });
+      if (!step.on_failure || step.on_failure === "stop") state.status = "failed";
       return step.on_failure ?? "stop";
     }
 
-    // v0.2 demo: policy rule evaluation is not implemented yet.
-    // All policy steps return "allow" so the happy-path journey runs end-to-end.
-    // The real policy engine (v0.3) will evaluate the rules[] block against context.
-    // default_decision is intentionally ignored here — it is a security-by-default
-    // fallback for unmatched contexts, not the outcome when rules match.
-    const decision = "completed"; // v0.2: always allow; see comment above
-    state.stepOutputs[step.id] = { policy_id: policy.id, decision, evaluated_at: new Date().toISOString() };
-    state.history.push({ stepId: step.id, type: "policy", outcome: decision,
-      output: state.stepOutputs[step.id], executedAt: new Date().toISOString() });
+    const decision = await this.policyEvaluator.evaluate(policy, this._policyRequest(state, step, policy));
+    const output = {
+      policy_id: decision.policyId,
+      decision: decision.outcome,
+      reason: decision.reason,
+      obligations: decision.obligations,
+      evaluated_at: decision.evaluatedAt,
+    };
+    state.stepOutputs[step.id] = output;
 
-    return decision === "denied" ? (step.on_failure ?? "stop") : step.on_success;
+    if (decision.outcome === "allow") {
+      state.history.push({ stepId: step.id, type: "policy", outcome: "completed",
+        output, executedAt: decision.evaluatedAt });
+      return step.on_success;
+    }
+
+    if (decision.outcome === "require_approval") {
+      state.history.push({ stepId: step.id, type: "policy", outcome: "waiting",
+        output, executedAt: decision.evaluatedAt });
+      await this._approvalStep(state, {
+        ...step,
+        approval: {
+          ...(step.approval ?? {}),
+          approver_role: step.approval?.approver_role ?? "policy-reviewer",
+        },
+      });
+      state.stepOutputs[step.id] = { ...state.stepOutputs[step.id], ...output };
+      return undefined;
+    }
+
+    state.history.push({ stepId: step.id, type: "policy", outcome: "denied",
+      output, executedAt: decision.evaluatedAt });
+    if (!step.on_failure || step.on_failure === "stop") state.status = "failed";
+    return step.on_failure ?? "stop";
   }
 
   async _approvalStep(state, step) {
@@ -209,6 +236,35 @@ export class InMemoryWorkflowEngine {
         Object.assign(merged, prior);
       }
     }
+    return merged;
+  }
+
+  _policyRequest(state, step, policy) {
+    const context = this._policyContext(state);
+    return {
+      agentId: String(context.agent_id ?? context.agentId ?? policy._scope?.agents?.[0] ?? ""),
+      skillId: String(context.skill_id ?? context.skillId ?? policy._scope?.skills?.[0] ?? ""),
+      toolId: String(step.tool_ref ?? context.tool_id ?? context.toolId ?? policy._scope?.tools?.[0] ?? ""),
+      workflowId: state.workflowId,
+      contextScopeId: String(context.context_scope_id ?? context.contextScopeId ?? policy._scope?.context_scopes?.[0] ?? ""),
+      context,
+    };
+  }
+
+  _policyContext(state) {
+    const workflow = state._workflow ?? {};
+    const merged = {
+      workflow_id: state.workflowId,
+      risk_tier: workflow._riskTier,
+      environment: workflow._environment,
+      ...state._input,
+    };
+
+    for (const [stepId, output] of Object.entries(state.stepOutputs)) {
+      merged[stepId] = output;
+      Object.assign(merged, output);
+    }
+
     return merged;
   }
 }

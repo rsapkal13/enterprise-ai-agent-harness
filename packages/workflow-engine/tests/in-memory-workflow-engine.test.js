@@ -34,6 +34,15 @@ function makeEngine() {
   });
 }
 
+function makeEngineWithPolicies(policies) {
+  const policyMap = new Map(policies.map((policy) => [policy.id, policy]));
+  return new InMemoryWorkflowEngine({
+    toolGateway:     gateway,
+    toolRegistry:    registries.tools,
+    policyRegistry:  { getPolicy: async (id) => policyMap.get(id) },
+  });
+}
+
 /** Build a minimal single-tool workflow for focused tests. */
 function singleToolWorkflow(toolRef, onSuccess = "complete") {
   return {
@@ -80,6 +89,19 @@ function approvalWorkflow() {
       { id: "do_work", type: "tool", tool_ref: "customer.read_limited_profile", on_success: "complete", on_failure: "stop" },
       { id: "complete", type: "completion" },
     ],
+  };
+}
+
+function telcoPolicyInput(customerReference) {
+  return {
+    customer_reference: customerReference,
+    requested_plan_id: "PLAN-PREMIUM-002",
+    agent_id: "customer-service-agent",
+    skill_id: "customer.change_plan",
+    session_purpose: "customer-care",
+    channel: "contact-center",
+    consent_present: true,
+    customer_confirmation_present: true,
   };
 }
 
@@ -157,12 +179,89 @@ describe("tool steps", () => {
 // ── Policy steps ──────────────────────────────────────────────────────────────
 
 describe("policy steps", () => {
-  test("known policy step completes in v0.2 demo mode", async () => {
-    const engine = makeEngine();
-    const state  = await engine.start({ workflow: singlePolicyWorkflow("customer_data.access"), input: {} });
+  test("known policy step completes when a rule matches allow", async () => {
+    const engine = makeEngineWithPolicies([
+      {
+        id: "policy.allow",
+        version: "1",
+        name: "Allow policy",
+        status: "active",
+        decisionType: "deny",
+        _rules: [
+          {
+            id: "allow_agent",
+            condition: { subject: { agent_id: "agent-1" }, context: { purpose: "test" } },
+            decision: "allow",
+          },
+        ],
+      },
+    ]);
+    const state  = await engine.start({
+      workflow: singlePolicyWorkflow("policy.allow"),
+      input: { agent_id: "agent-1", purpose: "test" },
+    });
     assert.equal(state.status, "completed");
     const policyResult = state.stepOutputs["step1"];
-    assert.equal(policyResult.decision, "completed");
+    assert.equal(policyResult.decision, "allow");
+    assert.equal(state.history[0].outcome, "completed");
+  });
+
+  test("rule-matched deny routes to on_failure and records the decision", async () => {
+    const engine = makeEngineWithPolicies([
+      {
+        id: "policy.deny",
+        version: "1",
+        name: "Deny policy",
+        status: "active",
+        decisionType: "allow",
+        _rules: [
+          {
+            id: "deny_high_risk",
+            condition: { context: { risk_tier: "T3" } },
+            decision: "deny",
+          },
+        ],
+      },
+    ]);
+    const state = await engine.start({
+      workflow: singlePolicyWorkflow("policy.deny"),
+      input: { risk_tier: "T3" },
+    });
+    assert.equal(state.status, "failed");
+    assert.equal(state.stepOutputs["step1"].decision, "deny");
+    assert.equal(state.history[0].outcome, "denied");
+  });
+
+  test("require_approval policy decision parks the workflow like an approval step", async () => {
+    const engine = makeEngineWithPolicies([
+      {
+        id: "policy.review",
+        version: "1",
+        name: "Review policy",
+        status: "active",
+        decisionType: "deny",
+        _rules: [
+          {
+            id: "review_t2",
+            condition: { context: { risk_tier: "T2" } },
+            decision: "require_approval",
+            obligations: [{ type: "capture_approval_reason" }],
+          },
+        ],
+      },
+    ]);
+    let state = await engine.start({
+      workflow: singlePolicyWorkflow("policy.review"),
+      input: { risk_tier: "T2" },
+    });
+    assert.equal(state.status, "waiting_for_approval");
+    assert.equal(state.pendingApprovalStepId, "step1");
+    assert.equal(state.stepOutputs["step1"].decision, "require_approval");
+    assert.deepEqual(state.stepOutputs["step1"].obligations, ["capture_approval_reason"]);
+
+    state = await engine.resume(state.runId, true, { approved_by: "policy-reviewer" });
+    assert.equal(state.status, "completed");
+    assert.equal(state.stepOutputs["step1"].approved, true);
   });
 
   test("unknown policy step fails and routes to on_failure", async () => {
@@ -175,6 +274,7 @@ describe("policy steps", () => {
       ],
     };
     const state = await engine.start({ workflow: wf, input: {} });
+    assert.equal(state.status, "failed");
     assert.equal(state.history[0].outcome, "failed");
   });
 });
@@ -235,11 +335,11 @@ describe("full telco plan-change journey", () => {
   const wf = manifests.workflows.find((w) => w.id === "customer.change_plan.workflow");
   // _rawSteps already attached by the loader (mapWorkflow stores them)
 
-  test("journey runs all 9 steps to completion with auto-approval", async () => {
+  test("journey runs to completion with auto-approval", async () => {
     const engine = makeEngine();
     let state = await engine.start({
       workflow: wf,
-      input: { customer_reference: "CUST-TEST-001", requested_plan_id: "PLAN-PREMIUM-002" },
+      input: telcoPolicyInput("CUST-TEST-001"),
     });
 
     // Auto-approve any approval steps
@@ -254,14 +354,14 @@ describe("full telco plan-change journey", () => {
     }
 
     assert.equal(state.status, "completed");
-    assert.equal(state.history.length, 9, `expected 9 steps, got ${state.history.length}`);
+    assert.equal(state.history.length, 10, `expected 10 steps, got ${state.history.length}`);
   });
 
   test("profile output contains customer_reference", async () => {
     const engine = makeEngine();
     let state = await engine.start({
       workflow: wf,
-      input: { customer_reference: "CUST-PROFILE-TEST", requested_plan_id: "PLAN-PREMIUM-002" },
+      input: telcoPolicyInput("CUST-PROFILE-TEST"),
     });
     while (state.status === "waiting_for_approval") {
       state = await engine.resume(state.runId, true, { consent_statement_version: "v1.0", approval_reference: "A" });
@@ -275,7 +375,7 @@ describe("full telco plan-change journey", () => {
     const engine = makeEngine();
     let state = await engine.start({
       workflow: wf,
-      input: { customer_reference: "CUST-PRICE-TEST", requested_plan_id: "PLAN-PREMIUM-002" },
+      input: telcoPolicyInput("CUST-PRICE-TEST"),
     });
     while (state.status === "waiting_for_approval") {
       state = await engine.resume(state.runId, true, { consent_statement_version: "v1.0", approval_reference: "A" });
@@ -289,7 +389,7 @@ describe("full telco plan-change journey", () => {
     const engine = makeEngine();
     let state = await engine.start({
       workflow: wf,
-      input: { customer_reference: "CUST-ORDER-TEST", requested_plan_id: "PLAN-PREMIUM-002" },
+      input: telcoPolicyInput("CUST-ORDER-TEST"),
     });
     while (state.status === "waiting_for_approval") {
       state = await engine.resume(state.runId, true, { consent_statement_version: "v1.0", approval_reference: "A" });
