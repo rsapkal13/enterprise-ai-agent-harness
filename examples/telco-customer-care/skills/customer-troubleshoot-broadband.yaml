@@ -1,0 +1,34 @@
+id: customer.troubleshoot_broadband
+version: 0.1.0
+name: Troubleshoot Broadband
+description: Guide broadband diagnostics and recommend next actions before scheduling a field visit.
+owner: network-support-platform
+risk_tier: T1
+lifecycle_state: draft
+environment: test
+approved_agents: []
+input_contract:
+  required_fields:
+    - customer_reference
+    - service_identifier
+    - symptom_summary
+output_contract:
+  fields:
+    - diagnostic_summary
+    - recommended_next_action
+required_context:
+  - customer.summary
+  - session.context
+tool_bindings: []
+policies:
+  - consent.required
+  - customer_data.access
+workflow_ref: customer.troubleshoot_broadband.workflow
+evaluation_requirements:
+  - troubleshooting_sequence_checks
+  - escalation_boundary_checks
+audit_required: true
+tags:
+  - fictional
+  - orphan-skill
+  - ready-to-link

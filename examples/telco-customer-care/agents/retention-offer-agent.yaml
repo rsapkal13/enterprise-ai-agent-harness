@@ -1,0 +1,48 @@
+id: retention-offer-agent
+version: 0.1.0
+name: Retention Offer Agent
+description: Fictional agent for preparing retention-save journeys and loyalty offer recommendations.
+purpose: Help service representatives evaluate churn signals and prepare governed retention offers.
+owner: customer-retention-platform
+additional_owners:
+  - ai-governance
+risk_tier: T2
+lifecycle_state: draft
+environment: test
+workload_identity:
+  identity_type: service_account
+  identity_ref: fictional-retention-offer-agent-identity
+  scopes:
+    - customer-care-read
+    - retention-offer-prepare
+approved_skills: []
+approved_tools: []
+allowed_channels:
+  - contact-center
+data_classes:
+  - internal
+  - confidential
+context_scopes:
+  - customer.summary
+  - account.entitlements
+model_policy:
+  allowed_model_classes:
+    - general_purpose
+  prompt_logging: redacted
+memory_policy:
+  mode: session_only
+  retention: none_after_session
+evaluation_refs:
+  - retention_offer_eval_pack
+slo_profile: assisted-service-standard
+runbook_url: runbook://fictional/retention-offer-agent
+rollback_plan: expire_prepared_offer
+human_oversight_mode: human_in_the_loop
+emergency_stop:
+  enabled: true
+  procedure_ref: runbook://fictional/agent-emergency-stop
+  blocked: false
+tags:
+  - fictional
+  - retention
+  - ready-to-link

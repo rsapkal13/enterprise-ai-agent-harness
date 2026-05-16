@@ -1,0 +1,49 @@
+id: field-service-agent
+version: 0.1.0
+name: Field Service Agent
+description: Fictional agent for field-service appointment triage and technician dispatch preparation.
+purpose: Help support teams assess broadband issues and prepare technician appointments.
+owner: field-operations-platform
+additional_owners:
+  - ai-governance
+risk_tier: T2
+lifecycle_state: draft
+environment: test
+workload_identity:
+  identity_type: service_account
+  identity_ref: fictional-field-service-agent-identity
+  scopes:
+    - customer-care-read
+    - appointment-request-prepare
+approved_skills: []
+approved_tools: []
+allowed_channels:
+  - contact-center
+  - web
+data_classes:
+  - internal
+  - confidential
+context_scopes:
+  - customer.summary
+  - session.context
+model_policy:
+  allowed_model_classes:
+    - general_purpose
+  prompt_logging: redacted
+memory_policy:
+  mode: session_only
+  retention: none_after_session
+evaluation_refs:
+  - field_service_eval_pack
+slo_profile: assisted-service-standard
+runbook_url: runbook://fictional/field-service-agent
+rollback_plan: cancel_prepared_appointment_request
+human_oversight_mode: human_in_the_loop
+emergency_stop:
+  enabled: true
+  procedure_ref: runbook://fictional/agent-emergency-stop
+  blocked: false
+tags:
+  - fictional
+  - field-service
+  - ready-to-link

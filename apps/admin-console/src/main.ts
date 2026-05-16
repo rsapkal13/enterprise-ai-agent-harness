@@ -111,15 +111,15 @@ function filtered(): RegistryObject[] {
   });
 }
 
-function metrics(): Array<[string, number, string]> {
+function metrics(): Array<[string, number, string, string]> {
   return [
-    ["Agents", byType("agent").length, "registered capability owners"],
-    ["Skills", byType("skill").length, "business capabilities"],
-    ["Tools", byType("tool").length, "governed system access"],
-    ["Approval queue", approvalQueueItems().length, "awaiting decision"],
-    ["Review events", reviewEvents.length, "local audit evidence"],
-    ["Local drafts", localDraftCount(), "stored in this browser"],
-    ["Certification gaps", registryObjects.filter((item) => !item.aiHarnessCertified).length, "blocked until reviewed"],
+    ["Agents", byType("agent").length, "registered capability owners", "agent"],
+    ["Skills", byType("skill").length, "business capabilities", "skill"],
+    ["Tools", byType("tool").length, "governed system access", "tool"],
+    ["Approval queue", approvalQueueItems().length, "awaiting decision", "approval-panel"],
+    ["Review events", reviewEvents.length, "local audit evidence", "evidence-panel"],
+    ["Local drafts", localDraftCount(), "stored in this browser", "drafts"],
+    ["Certification gaps", registryObjects.filter((item) => !item.aiHarnessCertified).length, "blocked until reviewed", "gaps"],
   ];
 }
 
@@ -290,12 +290,12 @@ function render(): void {
             ${state.showRegistration ? renderRegistrationForm() : ""}
 
             <div class="kpi-grid">
-              ${metrics().map(([label, value, note]) => `
-                <div class="kpi">
+              ${metrics().map(([label, value, note, action]) => `
+                <button class="kpi" data-kpi="${escapeHtml(action)}" type="button">
                   <div class="kpi-label">${label}</div>
                   <div class="kpi-value">${value}</div>
                   <div class="kpi-note">${note}</div>
-                </div>
+                </button>
               `).join("")}
             </div>
 
@@ -1217,6 +1217,46 @@ function bindEvents(): void {
       if (!targetId) return;
       const target = document.getElementById(targetId);
       if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>("[data-kpi]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const action = button.dataset.kpi;
+      if (!action) return;
+      if (action === "agent" || action === "skill" || action === "tool") {
+        state.type = action;
+        state.query = "";
+        state.risk = "all";
+        state.certification = "all";
+        state.selectedId = byType(action)[0]?.id ?? state.selectedId;
+        render();
+        document.querySelector(".workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      if (action === "drafts") {
+        const draft = registryObjects.find((item) => !seedIds.has(item.id));
+        state.type = "all";
+        state.query = draft?.id ?? "";
+        state.risk = "all";
+        state.certification = "all";
+        if (draft) state.selectedId = draft.id;
+        render();
+        document.querySelector(".workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      if (action === "gaps") {
+        const gap = registryObjects.find((item) => !item.aiHarnessCertified);
+        state.type = "all";
+        state.query = "";
+        state.risk = "all";
+        state.certification = "not_certified";
+        if (gap) state.selectedId = gap.id;
+        render();
+        document.querySelector(".workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      document.getElementById(action)?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 }

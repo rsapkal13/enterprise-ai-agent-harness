@@ -1,0 +1,33 @@
+id: customer.explain_bill
+version: 0.1.0
+name: Explain Customer Bill
+description: Explain bill line items and recent account charges in plain language.
+owner: billing-experience-platform
+risk_tier: T1
+lifecycle_state: draft
+environment: test
+approved_agents: []
+input_contract:
+  required_fields:
+    - customer_reference
+    - billing_period
+output_contract:
+  fields:
+    - explanation_summary
+    - disputed_charge_candidates
+required_context:
+  - customer.summary
+  - account.entitlements
+tool_bindings: []
+policies:
+  - consent.required
+  - customer_data.access
+workflow_ref: customer.explain_bill.workflow
+evaluation_requirements:
+  - billing_accuracy_checks
+  - pii_redaction_checks
+audit_required: true
+tags:
+  - fictional
+  - orphan-skill
+  - ready-to-link

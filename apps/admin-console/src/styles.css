@@ -572,14 +572,27 @@ h1 {
 }
 
 .kpi {
+  display: block;
+  width: 100%;
   padding: 16px 20px 18px;
   background: var(--ms-surface);
   border: 1px solid var(--ms-border);
   border-radius: 4px;
   box-shadow: var(--sh-s);
-  transition: box-shadow 0.15s;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
-.kpi:hover { box-shadow: var(--sh-m); }
+.kpi:hover {
+  border-color: var(--ms-blue);
+  box-shadow: var(--sh-m);
+  transform: translateY(-1px);
+}
+.kpi:focus-visible {
+  outline: 2px solid var(--ms-blue);
+  outline-offset: 2px;
+}
 
 /* M365 pattern: label → big number → note */
 .kpi-label {

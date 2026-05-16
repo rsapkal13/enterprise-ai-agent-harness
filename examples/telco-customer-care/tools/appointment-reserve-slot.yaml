@@ -1,0 +1,39 @@
+id: appointment.reserve_slot
+version: 0.1.0
+name: Reserve Appointment Slot
+description: Hold a fictional technician appointment slot for later human confirmation.
+owner: field-operations-platform
+risk_tier: T2
+lifecycle_state: draft
+environment: test
+target_system: fictional-appointment-system
+adapter_type: mock
+allowed_verbs:
+  - reserve_slot
+side_effects: reversible_write
+auth_method: scoped_workload_identity
+input_schema: schemas/appointment-reserve-slot.input.json
+output_schema: schemas/appointment-reserve-slot.output.json
+data_classification:
+  - confidential
+rate_limits:
+  window: minute
+  max_calls: 15
+approval_required: true
+approval_conditions:
+  - context:
+      customer_confirmation_present: true
+    decision: require_approval
+policy_refs:
+  - consent.required
+  - high_risk.action
+audit_logging:
+  required: true
+  event_types:
+    - tool_call
+    - system_interaction
+evaluation_refs:
+  - field_service_eval_pack
+tags:
+  - fictional
+  - ready-to-link

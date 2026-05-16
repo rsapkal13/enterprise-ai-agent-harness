@@ -1,0 +1,39 @@
+id: crm.create_case
+version: 0.1.0
+name: Create CRM Case
+description: Create a fictional CRM case record for complaint, retention, or service follow-up workflows.
+owner: customer-care-platform
+risk_tier: T2
+lifecycle_state: draft
+environment: test
+target_system: fictional-crm-system
+adapter_type: mock
+allowed_verbs:
+  - create_case
+side_effects: reversible_write
+auth_method: scoped_workload_identity
+input_schema: schemas/crm-create-case.input.json
+output_schema: schemas/crm-create-case.output.json
+data_classification:
+  - confidential
+rate_limits:
+  window: minute
+  max_calls: 30
+approval_required: true
+approval_conditions:
+  - context:
+      customer_confirmation_present: true
+    decision: require_approval
+policy_refs:
+  - consent.required
+  - customer_data.access
+audit_logging:
+  required: true
+  event_types:
+    - tool_call
+    - system_interaction
+evaluation_refs:
+  - case_creation_eval_pack
+tags:
+  - fictional
+  - ready-to-link

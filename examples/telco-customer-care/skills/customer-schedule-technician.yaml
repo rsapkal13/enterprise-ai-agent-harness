@@ -1,0 +1,34 @@
+id: customer.schedule_technician
+version: 0.1.0
+name: Schedule Technician Visit
+description: Prepare a technician visit request after issue triage and customer availability capture.
+owner: field-operations-platform
+risk_tier: T2
+lifecycle_state: draft
+environment: test
+approved_agents: []
+input_contract:
+  required_fields:
+    - customer_reference
+    - service_address_id
+    - preferred_window
+output_contract:
+  fields:
+    - appointment_hold_id
+    - appointment_status
+required_context:
+  - customer.summary
+  - session.context
+tool_bindings: []
+policies:
+  - consent.required
+  - customer_data.access
+workflow_ref: customer.schedule_technician.workflow
+evaluation_requirements:
+  - appointment_policy_checks
+  - address_scope_checks
+audit_required: true
+tags:
+  - fictional
+  - orphan-skill
+  - ready-to-link
