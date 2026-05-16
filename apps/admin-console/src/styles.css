@@ -427,9 +427,24 @@ p { margin: 0; }
 .compact { height: 28px; padding: 0 12px; font-size: 12px; }
 
 /* ── Content area ────────────────────────────────────────────────────────── */
-.content {
+.main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
+  align-items: start;
+  gap: 16px;
   max-width: 1600px;
   padding: 20px 20px 40px;
+}
+
+.content {
+  min-width: 0;
+}
+
+.detail-rail {
+  min-width: 0;
+  position: sticky;
+  top: calc(48px + 49px + 20px);
+  max-height: calc(100vh - 48px - 49px - 40px);
 }
 
 /* ── Page header (M365 style) ────────────────────────────────────────────── */
@@ -781,7 +796,7 @@ h1 {
 /* ── Registry card list ──────────────────────────────────────────────────── */
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 420px;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 }
 
@@ -821,9 +836,7 @@ h1 {
 
 /* ── Detail panel ────────────────────────────────────────────────────────── */
 .detail-panel {
-  position: sticky;
-  top: calc(48px + 49px);
-  max-height: calc(100vh - 48px - 49px - 40px);
+  max-height: inherit;
   overflow-y: auto;
   padding: 18px;
   border-radius: 4px;
@@ -1052,12 +1065,14 @@ textarea.field { height: auto; min-height: 80px; padding: 8px 10px; resize: vert
   .app-shell    { grid-template-columns: 1fr; }
   .sidebar      { position: static; height: auto; overflow: visible; flex-direction: row; flex-wrap: wrap; }
   .sidebar-nav  { overflow: visible; }
+  .main-layout  { grid-template-columns: 1fr; }
   .workspace    { grid-template-columns: 1fr; }
   .hero         { grid-template-columns: 1fr; }
   .graph-lane   { grid-template-columns: 1fr; }
   .graph-connector { width: 2px; height: 24px; align-self: auto; justify-self: center; background: linear-gradient(180deg, var(--ms-blue-light), var(--ms-blue)); }
   .graph-connector::after { margin-top: auto; margin-left: -2.5px; transform: rotate(135deg); }
-  .detail-panel { position: static; max-height: none; }
+  .detail-rail { position: static; max-height: none; }
+  .detail-panel { max-height: none; }
 }
 
 @media (max-width: 760px) {

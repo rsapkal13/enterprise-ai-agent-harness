@@ -263,27 +263,28 @@ function render(): void {
             <button id="newRegistration" class="primary-action" type="button">Register new</button>
           </header>
 
-          <section class="content">
-            <div class="hero">
-              <div class="hero-card">
-                <div class="eyebrow"><span class="eyebrow-text">v0.2 · Governance portal</span></div>
-                <h1>Agent Governance overview</h1>
-                <p>
-                  Register, certify, and govern agents, skills, and tools across your telco platform.
-                  Inspect risk tiers, certification readiness, policy coverage, and dependency relationships
-                  before approving any registry change.
-                </p>
-              </div>
-              <div class="hero-card">
-                <div class="eyebrow"><span class="eyebrow-text">Build status</span></div>
-                <div class="release-list">
-                  <div class="release-row"><span>Mode</span><b>Local draft registration</b></div>
-                  <div class="release-row"><span>Source</span><b>${escapeHtml(backendStatus)}</b></div>
-                  <div class="release-row"><span>Persistence</span><b>Browser local storage</b></div>
-                  <div class="release-row"><span>Review</span><b>Approval evidence trail</b></div>
+          <div class="main-layout">
+            <section class="content">
+              <div class="hero">
+                <div class="hero-card">
+                  <div class="eyebrow"><span class="eyebrow-text">v0.2 · Governance portal</span></div>
+                  <h1>Agent Governance overview</h1>
+                  <p>
+                    Register, certify, and govern agents, skills, and tools across your telco platform.
+                    Inspect risk tiers, certification readiness, policy coverage, and dependency relationships
+                    before approving any registry change.
+                  </p>
+                </div>
+                <div class="hero-card">
+                  <div class="eyebrow"><span class="eyebrow-text">Build status</span></div>
+                  <div class="release-list">
+                    <div class="release-row"><span>Mode</span><b>Local draft registration</b></div>
+                    <div class="release-row"><span>Source</span><b>${escapeHtml(backendStatus)}</b></div>
+                    <div class="release-row"><span>Persistence</span><b>Browser local storage</b></div>
+                    <div class="release-row"><span>Review</span><b>Approval evidence trail</b></div>
+                  </div>
                 </div>
               </div>
-            </div>
 
             ${state.notice ? `<div class="notice">${escapeHtml(state.notice)}</div>` : ""}
             ${state.showRegistration ? renderRegistrationForm() : ""}
@@ -316,9 +317,12 @@ function render(): void {
                   ${list.length ? list.map(renderRegistryCard).join("") : '<div class="empty">No registry objects match the current filters.</div>'}
                 </div>
               </section>
-              ${renderDetail(current)}
             </div>
           </section>
+          <aside class="detail-rail" aria-label="Selected object details">
+            ${renderDetail(current)}
+          </aside>
+          </div>
         </main>
       </div>
     </div>
@@ -684,7 +688,7 @@ function renderRegistryCard(item: RegistryObject): string {
 
 function renderDetail(item: RegistryObject): string {
   return `
-    <aside class="detail-panel">
+    <section class="detail-panel">
       <div class="eyebrow">${item.type} detail</div>
       <h2>${escapeHtml(item.name)}</h2>
       <p class="detail-description">${escapeHtml(item.description)}</p>
@@ -694,6 +698,8 @@ function renderDetail(item: RegistryObject): string {
         ${chip(item.lifecycleState)}
         ${chip(item.aiHarnessCertified ? "AI Harness Certified" : "Not Certified", item.aiHarnessCertified ? "green" : "red")}
       </div>
+      ${kv("Source", item.sourcePath)}
+      ${renderSourceReview(item)}
       ${kv("Version", item.version)}
       ${kv("Owner", item.owner)}
       ${kv("Environment", item.environment)}
@@ -703,8 +709,6 @@ function renderDetail(item: RegistryObject): string {
       ${kv("Decision note", renderDecisionNote(item))}
       ${kv("Review actions", renderReviewActions(item))}
       ${kv("Review history", renderObjectHistory(item))}
-      ${kv("Source", item.sourcePath)}
-      ${renderSourceReview(item)}
       ${kv("Data classes", item.dataClasses.map((value) => chip(value)).join(" "))}
       ${kv("Policies", item.policies.map((value) => chip(value)).join(" "))}
       ${item.inputs ? kv("Inputs", item.inputs.map((value) => chip(value)).join(" ")) : ""}
@@ -712,7 +716,7 @@ function renderDetail(item: RegistryObject): string {
       ${item.sideEffects ? kv("Side effects", chip(item.sideEffects)) : ""}
       ${item.targetSystem ? kv("Target system", item.targetSystem) : ""}
       ${kv("Relationships", `<div class="relationship-list">${item.relationships.map((value) => chip(value)).join("") || chip("none", "red")}</div>`)}
-    </aside>
+    </section>
   `;
 }
 
