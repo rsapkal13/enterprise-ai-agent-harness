@@ -30,13 +30,17 @@ type ReviewEvent = {
 };
 
 type FormErrors = Record<string, string>;
+type RegistryApiResponse = {
+  objects: RegistryObject[];
+  generatedAt: string;
+};
 
 const DRAFT_STORAGE_KEY = "agentharness.adminConsole.localDrafts.v1";
 const REVIEW_STORAGE_KEY = "agentharness.adminConsole.reviewEvents.v1";
-const seedIds = new Set(seedRegistryObjects.map((item) => item.id));
-
-const registryObjects: RegistryObject[] = [...loadDrafts(), ...seedRegistryObjects];
-const reviewEvents: ReviewEvent[] = loadReviewEvents();
+let seedIds = new Set(seedRegistryObjects.map((item) => item.id));
+let registryObjects: RegistryObject[] = [...loadDrafts(), ...seedRegistryObjects];
+let reviewEvents: ReviewEvent[] = loadReviewEvents();
+let backendStatus = "Using bundled frontend fallback";
 
 const state: FilterState & { selectedId: string; showRegistration: boolean; notice: string; formErrors: FormErrors } = {
   type: "agent",
@@ -124,102 +128,199 @@ function render(): void {
   const list = filtered();
 
   app.innerHTML = `
-    <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-mark">AH</div>
-          <div>
-            <div class="brand-title">AgentHarness</div>
-            <div class="brand-subtitle">Governance Portal</div>
+    <div class="ms-root">
+      <nav class="ms-topnav">
+        <button class="ms-waffle" type="button" aria-label="App launcher">
+          <svg viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+            <circle cx="4" cy="4" r="1.5"/><circle cx="10" cy="4" r="1.5"/><circle cx="16" cy="4" r="1.5"/>
+            <circle cx="4" cy="10" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="16" cy="10" r="1.5"/>
+            <circle cx="4" cy="16" r="1.5"/><circle cx="10" cy="16" r="1.5"/><circle cx="16" cy="16" r="1.5"/>
+          </svg>
+        </button>
+        <span class="ms-topnav-brand">AgentHarness</span>
+        <span class="ms-topnav-sep"></span>
+        <span class="ms-topnav-product">Governance Portal</span>
+        <div class="ms-topnav-section">
+          <span class="ms-env-chip">TEST</span>
+          <button class="ms-nav-icon-btn" type="button" aria-label="Help">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M10 11.5v-.5c0-.9.5-1.4 1.1-1.9.7-.5 1.1-1.1 1.1-1.8A2.2 2.2 0 0 0 10 5.2 2.2 2.2 0 0 0 7.8 7.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="10" cy="14.2" r=".9" fill="currentColor"/>
+            </svg>
+          </button>
+          <button class="ms-nav-icon-btn" type="button" aria-label="Settings">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+              <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M4.3 15.7l1.4-1.4M14.3 5.7l1.4-1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="ms-avatar" aria-label="User account">AH</div>
+        </div>
+      </nav>
+
+      <div class="app-shell">
+        <aside class="sidebar">
+          <div class="sidebar-app-header">
+            <div class="sidebar-app-name">Governance Portal</div>
+            <div class="sidebar-app-org">AgentHarness · v0.2</div>
           </div>
-        </div>
-        <div class="side-label">Registry scope</div>
-        <div class="tabs">
-          ${renderTab("agent", "Agent Registry", byType("agent").length)}
-          ${renderTab("skill", "Skill Registry", byType("skill").length)}
-          ${renderTab("tool", "Tool Registry", byType("tool").length)}
-          ${renderTab("all", "All Objects", registryObjects.length)}
-        </div>
-        <div class="sidebar-note">
-          v0.2 portal slice: local registration, certification readiness, and relationship-aware registry review.
-        </div>
-      </aside>
 
-      <main>
-        <header class="topbar">
-          <input id="search" class="search" type="search" value="${escapeHtml(state.query)}" placeholder="Search registry objects, relationships, policies..." />
-          <select id="riskFilter" class="select">
-            ${option("all", "All risk tiers", state.risk)}
-            ${option("T0", "T0", state.risk)}
-            ${option("T1", "T1", state.risk)}
-            ${option("T2", "T2", state.risk)}
-            ${option("T3", "T3", state.risk)}
-          </select>
-          <select id="certFilter" class="select">
-            ${option("all", "All certification states", state.certification)}
-            ${option("certified", "AI Harness Certified", state.certification)}
-            ${option("not_certified", "Not certified", state.certification)}
-          </select>
-          ${localDraftCount() ? '<button id="clearDrafts" class="secondary-action" type="button">Clear drafts</button>' : ""}
-          <button id="newRegistration" class="primary-action" type="button">Register new</button>
-        </header>
+          <div class="sidebar-search-wrap">
+            <svg class="sidebar-search-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
+              <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M10.5 10.5L13.5 13.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            <span class="sidebar-search-placeholder">Search</span>
+          </div>
 
-        <section class="content">
-          <div class="hero">
-            <div class="hero-card">
-              <div class="eyebrow">Governance portal application</div>
-              <h1>Register and inspect <span class="gradient-text">agents, skills, and tools</span>.</h1>
-              <p>
-                This v0.2 portal slice gives governance, architecture, and platform teams a working local surface:
-                ownership, risk tier, lifecycle state, certification evidence, approved relationships, and blocked gaps.
-              </p>
+          <nav class="sidebar-nav">
+            <div class="nav-section">
+              <div class="nav-section-label">Registry</div>
+              ${renderTab("agent", "Agent Registry", byType("agent").length)}
+              ${renderTab("skill", "Skill Registry", byType("skill").length)}
+              ${renderTab("tool", "Tool Registry", byType("tool").length)}
+              ${renderTab("all", "All Objects", registryObjects.length)}
             </div>
-            <div class="hero-card">
-              <div class="eyebrow">Current build slice</div>
-              <div class="release-list">
-                <div class="release-row"><span>Mode</span><b>Local draft registration</b></div>
-                <div class="release-row"><span>Source</span><b>Fictional telco manifests</b></div>
-                <div class="release-row"><span>Persistence</span><b>Browser local storage</b></div>
-                <div class="release-row"><span>Review</span><b>Approval evidence trail</b></div>
-              </div>
+
+            <div class="nav-section">
+              <div class="nav-section-label">Govern</div>
+              <button class="nav-item-static" data-scroll="approval-panel" type="button">
+                <!-- Inbox tray with down-arrow — approval queue / items waiting for decision -->
+                <svg class="tab-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="2.5" y="12" width="15" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M10 2.5v7M7 6.5l3 3.5 3-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="tab-label">Approval Queue</span>
+                <span class="nav-badge">${approvalQueueItems().length}</span>
+              </button>
+              <button class="nav-item-static" disabled type="button">
+                <!-- Shield — policy enforcement -->
+                <svg class="tab-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 2.5L16.5 5v5c0 3.5-2.7 6.4-6.5 7.5C6.2 16.4 3.5 13.5 3.5 10V5L10 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                  <path d="M7.5 10l2 2 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="tab-label">Policy Engine</span>
+                <span class="nav-badge coming">v0.3</span>
+              </button>
             </div>
-          </div>
 
-          ${state.notice ? `<div class="notice">${escapeHtml(state.notice)}</div>` : ""}
-          ${state.showRegistration ? renderRegistrationForm() : ""}
+            <div class="nav-section">
+              <div class="nav-section-label">Certify &amp; Audit</div>
+              <button class="nav-item-static" data-scroll="evidence-panel" type="button">
+                <!-- Scroll / log — ordered audit trail -->
+                <svg class="tab-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 3.5h8a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 17V5A1.5 1.5 0 0 1 6 3.5z" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M7.5 8h5M7.5 11h5M7.5 14h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span class="tab-label">Evidence Trail</span>
+                <span class="nav-badge">${reviewEvents.length}</span>
+              </button>
+              <button class="nav-item-static" data-scroll="graph-panel" type="button">
+                <!-- Connected nodes — dependency relationships -->
+                <svg class="tab-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+                  <circle cx="3.5" cy="4" r="2" stroke="currentColor" stroke-width="1.5"/>
+                  <circle cx="16.5" cy="4" r="2" stroke="currentColor" stroke-width="1.5"/>
+                  <circle cx="10" cy="17.5" r="2" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M5.2 5.6L8 8M14.8 5.6L12 8M10 12.5V15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span class="tab-label">Dependency Graph</span>
+              </button>
+              <button class="nav-item-static" disabled type="button">
+                <!-- Bar chart — compliance scoring -->
+                <svg class="tab-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 16.5h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <rect x="4" y="10" width="3" height="6.5" rx="0.5" stroke="currentColor" stroke-width="1.3"/>
+                  <rect x="8.5" y="6" width="3" height="10.5" rx="0.5" stroke="currentColor" stroke-width="1.3"/>
+                  <rect x="13" y="3" width="3" height="13.5" rx="0.5" stroke="currentColor" stroke-width="1.3"/>
+                </svg>
+                <span class="tab-label">Compliance Scores</span>
+                <span class="nav-badge coming">v0.3</span>
+              </button>
+            </div>
+          </nav>
 
-          <div class="kpi-grid">
-            ${metrics().map(([label, value, note]) => `
-              <div class="kpi">
-                <div class="kpi-value">${value}</div>
-                <div class="kpi-label">${label}</div>
-                <div class="kpi-note">${note}</div>
+          <div class="sidebar-note">v0.2 local runtime preview · fictional telco example data</div>
+        </aside>
+
+        <main>
+          <header class="topbar">
+            <input id="search" class="search" type="search" value="${escapeHtml(state.query)}" placeholder="Search registry objects, relationships, policies..." />
+            <select id="riskFilter" class="select">
+              ${option("all", "All risk tiers", state.risk)}
+              ${option("T0", "T0", state.risk)}
+              ${option("T1", "T1", state.risk)}
+              ${option("T2", "T2", state.risk)}
+              ${option("T3", "T3", state.risk)}
+            </select>
+            <select id="certFilter" class="select">
+              ${option("all", "All certification states", state.certification)}
+              ${option("certified", "AI Harness Certified", state.certification)}
+              ${option("not_certified", "Not certified", state.certification)}
+            </select>
+            ${localDraftCount() ? '<button id="clearDrafts" class="secondary-action" type="button">Clear drafts</button>' : ""}
+            <button id="newRegistration" class="primary-action" type="button">Register new</button>
+          </header>
+
+          <section class="content">
+            <div class="hero">
+              <div class="hero-card">
+                <div class="eyebrow"><span class="eyebrow-text">v0.2 · Governance portal</span></div>
+                <h1>Agent Governance overview</h1>
+                <p>
+                  Register, certify, and govern agents, skills, and tools across your telco platform.
+                  Inspect risk tiers, certification readiness, policy coverage, and dependency relationships
+                  before approving any registry change.
+                </p>
               </div>
-            `).join("")}
-          </div>
-
-          ${renderRelationshipGraph()}
-          ${renderApprovalQueue()}
-          ${renderEvidencePanel()}
-
-          <div class="workspace">
-            <section class="panel">
-              <div class="panel-head">
-                <div>
-                  <div class="eyebrow">${state.type === "all" ? "Registry explorer" : `${state.type} registry`}</div>
-                  <div class="panel-title">${list.length} object${list.length === 1 ? "" : "s"} shown</div>
-                  <div class="panel-subtitle">Click an object to inspect certification, policies, contracts, and relationships.</div>
+              <div class="hero-card">
+                <div class="eyebrow"><span class="eyebrow-text">Build status</span></div>
+                <div class="release-list">
+                  <div class="release-row"><span>Mode</span><b>Local draft registration</b></div>
+                  <div class="release-row"><span>Source</span><b>${escapeHtml(backendStatus)}</b></div>
+                  <div class="release-row"><span>Persistence</span><b>Browser local storage</b></div>
+                  <div class="release-row"><span>Review</span><b>Approval evidence trail</b></div>
                 </div>
-                ${chip(state.type === "all" ? "all" : state.type)}
               </div>
-              <div class="registry-list">
-                ${list.length ? list.map(renderRegistryCard).join("") : '<div class="empty">No registry objects match the current filters.</div>'}
-              </div>
-            </section>
-            ${renderDetail(current)}
-          </div>
-        </section>
-      </main>
+            </div>
+
+            ${state.notice ? `<div class="notice">${escapeHtml(state.notice)}</div>` : ""}
+            ${state.showRegistration ? renderRegistrationForm() : ""}
+
+            <div class="kpi-grid">
+              ${metrics().map(([label, value, note]) => `
+                <div class="kpi">
+                  <div class="kpi-label">${label}</div>
+                  <div class="kpi-value">${value}</div>
+                  <div class="kpi-note">${note}</div>
+                </div>
+              `).join("")}
+            </div>
+
+            ${renderRelationshipGraph()}
+            ${renderApprovalQueue()}
+            ${renderEvidencePanel()}
+
+            <div class="workspace">
+              <section class="panel">
+                <div class="panel-head">
+                  <div>
+                    <div class="eyebrow">${state.type === "all" ? "Registry explorer" : `${state.type} registry`}</div>
+                    <div class="panel-title">${list.length} object${list.length === 1 ? "" : "s"} shown</div>
+                    <div class="panel-subtitle">Click an object to inspect certification, policies, contracts, and relationships.</div>
+                  </div>
+                  ${chip(state.type === "all" ? "all" : state.type)}
+                </div>
+                <div class="registry-list">
+                  ${list.length ? list.map(renderRegistryCard).join("") : '<div class="empty">No registry objects match the current filters.</div>'}
+                </div>
+              </section>
+              ${renderDetail(current)}
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
   `;
 
@@ -227,9 +328,20 @@ function render(): void {
 }
 
 function renderTab(type: RegistryType | "all", label: string, count: number): string {
+  const icons: Record<RegistryType | "all", string> = {
+    // Person silhouette — represents an AI agent
+    agent: `<svg class="tab-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17c0-3.59 2.91-6.5 6.5-6.5s6.5 2.91 6.5 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+    // Lightning bolt — reusable business capability
+    skill: `<svg class="tab-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.5 2.5L5 11h6l-2 6.5L18 8.5h-6l1.5-6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>`,
+    // Wrench — system tool / governed integration
+    tool: `<svg class="tab-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.8 2.2a3.5 3.5 0 0 0-4.6 4.6L3.5 13.5a1.5 1.5 0 1 0 2.1 2.1l6.7-6.7A3.5 3.5 0 0 0 14.8 2.2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+    // 2×2 grid — all object types
+    all: `<svg class="tab-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11.5" y="3" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="11.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>`,
+  };
   return `
     <button class="tab ${state.type === type ? "active" : ""}" data-type="${type}">
-      <span>${label}</span>
+      ${icons[type] ?? ""}
+      <span class="tab-label">${label}</span>
       <span class="tab-count">${count}</span>
     </button>
   `;
@@ -371,7 +483,7 @@ function renderRelationshipGraph(): string {
   const agents = byType("agent");
   const graphGaps = relationshipGaps();
   return `
-    <section class="graph-panel">
+    <section class="graph-panel" id="graph-panel">
       <div class="panel-head">
         <div>
           <div class="eyebrow">Dependency graph</div>
@@ -463,7 +575,7 @@ function renderGraphEmpty(label: string): string {
 function renderApprovalQueue(): string {
   const queue = approvalQueueItems();
   return `
-    <section class="approval-panel">
+    <section class="approval-panel" id="approval-panel">
       <div class="panel-head">
         <div>
           <div class="eyebrow">Approval queue</div>
@@ -509,7 +621,7 @@ function renderApprovalItem(item: RegistryObject): string {
 function renderEvidencePanel(): string {
   const recentEvents = reviewEvents.slice(0, 5);
   return `
-    <section class="evidence-panel">
+    <section class="evidence-panel" id="evidence-panel">
       <div class="panel-head">
         <div>
           <div class="eyebrow">Evidence trail</div>
@@ -592,6 +704,7 @@ function renderDetail(item: RegistryObject): string {
       ${kv("Review actions", renderReviewActions(item))}
       ${kv("Review history", renderObjectHistory(item))}
       ${kv("Source", item.sourcePath)}
+      ${renderSourceReview(item)}
       ${kv("Data classes", item.dataClasses.map((value) => chip(value)).join(" "))}
       ${kv("Policies", item.policies.map((value) => chip(value)).join(" "))}
       ${item.inputs ? kv("Inputs", item.inputs.map((value) => chip(value)).join(" ")) : ""}
@@ -601,6 +714,56 @@ function renderDetail(item: RegistryObject): string {
       ${kv("Relationships", `<div class="relationship-list">${item.relationships.map((value) => chip(value)).join("") || chip("none", "red")}</div>`)}
     </aside>
   `;
+}
+
+function renderSourceReview(item: RegistryObject): string {
+  const source = sourceFor(item);
+  const extension = item.sourcePath.split(".").pop() || "txt";
+  const language = source.available ? extension : "yaml";
+  return `
+    <section class="source-review">
+      <div class="source-review-head">
+        <div>
+          <div class="source-review-title">Source review</div>
+          <div class="source-review-path">${escapeHtml(item.sourcePath)}</div>
+        </div>
+        ${chip(language)}
+      </div>
+      <pre class="source-code" tabindex="0"><code>${escapeHtml(source.content)}</code></pre>
+    </section>
+  `;
+}
+
+function sourceFor(item: RegistryObject): { available: boolean; content: string } {
+  if (item.sourceContent) {
+    return { available: item.sourceAvailable ?? true, content: item.sourceContent.trimEnd() };
+  }
+
+  return {
+    available: false,
+    content: [
+      `id: ${item.id}`,
+      `type: ${item.type}`,
+      `name: ${item.name}`,
+      `version: ${item.version}`,
+      `owner: ${item.owner}`,
+      `risk_tier: ${item.riskTier}`,
+      `lifecycle_state: ${item.lifecycleState}`,
+      `environment: ${item.environment}`,
+      `source: ${item.sourcePath}`,
+      "policies:",
+      ...item.policies.map((policy) => `  - ${policy}`),
+      "relationships:",
+      ...item.relationships.map((relationship) => `  - ${relationship}`),
+      item.inputs?.length ? "inputs:" : "",
+      ...(item.inputs ?? []).map((input) => `  - ${input}`),
+      item.outputs?.length ? "outputs:" : "",
+      ...(item.outputs ?? []).map((output) => `  - ${output}`),
+      item.sideEffects ? `side_effects: ${item.sideEffects}` : "",
+      item.targetSystem ? `target_system: ${item.targetSystem}` : "",
+      "review_note: Source file is not bundled; showing registry snapshot for review.",
+    ].filter(Boolean).join("\n"),
+  };
 }
 
 function kv(key: string, value: string): string {
@@ -793,7 +956,9 @@ function applyReviewDecision(id: string, action: ReviewAction, reason: string): 
     state.notice = `${item.name} was blocked and removed from active certification eligibility.`;
   }
 
-  reviewEvents.unshift(createReviewEvent(item, action, decisionReason));
+  const reviewEvent = createReviewEvent(item, action, decisionReason);
+  reviewEvents.unshift(reviewEvent);
+  persistBackendReview(reviewEvent);
   state.selectedId = item.id;
   saveDrafts();
   saveReviewEvents();
@@ -1041,6 +1206,15 @@ function bindEvents(): void {
     if (first) state.selectedId = first.id;
     render();
   });
+
+  document.querySelectorAll<HTMLButtonElement>("[data-scroll]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const targetId = button.dataset.scroll;
+      if (!targetId) return;
+      const target = document.getElementById(targetId);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
 }
 
 function normalizeId(value: string): string {
@@ -1092,6 +1266,16 @@ function saveReviewEvents(): void {
   window.localStorage.setItem(REVIEW_STORAGE_KEY, JSON.stringify(reviewEvents));
 }
 
+function persistBackendReview(event: ReviewEvent): void {
+  fetch("/api/reviews", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(event),
+  }).catch(() => {
+    // Local storage is the offline write-through fallback for review evidence.
+  });
+}
+
 function storageAvailable(): boolean {
   return typeof window !== "undefined" && "localStorage" in window;
 }
@@ -1108,4 +1292,39 @@ function isReviewEvent(value: unknown): value is ReviewEvent {
   return Boolean(maybe.id && maybe.objectId && maybe.action && maybe.timestamp && maybe.auditEventId);
 }
 
-render();
+async function initialize(): Promise<void> {
+  await Promise.all([loadBackendRegistry(), loadBackendReviews()]);
+  render();
+}
+
+async function loadBackendRegistry(): Promise<void> {
+  try {
+    const response = await fetch("/api/registry");
+    if (!response.ok) throw new Error(`Registry API returned ${response.status}`);
+    const payload = await response.json() as RegistryApiResponse;
+    if (!Array.isArray(payload.objects)) throw new Error("Registry API returned an invalid payload");
+
+    seedIds = new Set(payload.objects.map((item) => item.id));
+    registryObjects = [...loadDrafts(), ...payload.objects];
+    backendStatus = `Backend API · ${payload.objects.length} manifest objects`;
+    state.selectedId = registryObjects.find((item) => item.id === state.selectedId)?.id ?? registryObjects[0]?.id ?? "";
+  } catch (error) {
+    backendStatus = "Frontend fallback · backend unavailable";
+    state.notice = `Backend API unavailable, using bundled fallback data. ${error instanceof Error ? error.message : ""}`.trim();
+  }
+}
+
+async function loadBackendReviews(): Promise<void> {
+  try {
+    const response = await fetch("/api/reviews");
+    if (!response.ok) return;
+    const payload = await response.json() as { events?: ReviewEvent[] };
+    if (Array.isArray(payload.events)) {
+      reviewEvents = [...loadReviewEvents(), ...payload.events].filter(isReviewEvent);
+    }
+  } catch {
+    // Local storage remains the offline review-event fallback.
+  }
+}
+
+initialize();

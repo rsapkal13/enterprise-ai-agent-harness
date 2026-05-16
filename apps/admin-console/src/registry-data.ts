@@ -16,6 +16,8 @@ export type RegistryObject = {
   certificationEvidence: string;
   approvalState: "approved" | "pending" | "not_certified" | "blocked";
   sourcePath: string;
+  sourceContent?: string;
+  sourceAvailable?: boolean;
   dataClasses: string[];
   policies: string[];
   relationships: string[];
