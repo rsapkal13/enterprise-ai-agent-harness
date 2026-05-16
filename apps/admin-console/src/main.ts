@@ -35,20 +35,35 @@ type RegistryApiResponse = {
   generatedAt: string;
 };
 
+type PublicSkill = {
+  id: string;
+  name: string;
+  description: string;
+  license: string;
+  repo: string;
+  sourcePath: string;
+};
+
 const DRAFT_STORAGE_KEY = "agentharness.adminConsole.localDrafts.v1";
 const REVIEW_STORAGE_KEY = "agentharness.adminConsole.reviewEvents.v1";
+const DEFAULT_PUBLIC_SKILLS_REPO = "https://github.com/anthropics/skills.git";
 let seedIds = new Set(seedRegistryObjects.map((item) => item.id));
 let registryObjects: RegistryObject[] = [...loadDrafts(), ...seedRegistryObjects];
 let reviewEvents: ReviewEvent[] = loadReviewEvents();
 let backendStatus = "Using bundled frontend fallback";
+let publicSkills: PublicSkill[] = [];
+let selectedPublicSkillIds = new Set<string>();
+let publicSkillStatus = "Lookup available public skills from a GitHub repo before importing them into local governance.";
 
-const state: FilterState & { selectedId: string; showRegistration: boolean; notice: string; formErrors: FormErrors } = {
+const state: FilterState & { selectedId: string; showRegistration: boolean; showImport: boolean; publicRepoUrl: string; notice: string; formErrors: FormErrors } = {
   type: "agent",
   risk: "all",
   certification: "all",
   query: "",
   selectedId: registryObjects[0]?.id ?? "customer-service-agent",
   showRegistration: false,
+  showImport: false,
+  publicRepoUrl: DEFAULT_PUBLIC_SKILLS_REPO,
   notice: "",
   formErrors: {},
 };
@@ -260,6 +275,7 @@ function render(): void {
               ${option("not_certified", "Not certified", state.certification)}
             </select>
             ${localDraftCount() ? '<button id="clearDrafts" class="secondary-action" type="button">Clear drafts</button>' : ""}
+            <button id="importSkills" class="secondary-action" type="button">Import skills</button>
             <button id="newRegistration" class="primary-action" type="button">Register new</button>
           </header>
 
@@ -287,6 +303,7 @@ function render(): void {
               </div>
 
             ${state.notice ? `<div class="notice">${escapeHtml(state.notice)}</div>` : ""}
+            ${state.showImport ? renderPublicSkillImportPanel() : ""}
             ${state.showRegistration ? renderRegistrationForm() : ""}
 
             <div class="kpi-grid">
@@ -438,6 +455,52 @@ function renderRegistrationForm(): string {
         </div>
       </form>
     </section>
+  `;
+}
+
+function renderPublicSkillImportPanel(): string {
+  return `
+    <section class="import-panel">
+      <div class="panel-head">
+        <div>
+          <div class="eyebrow">Public skill lookup</div>
+          <div class="panel-title">Import skills from GitHub</div>
+          <div class="panel-subtitle">Discover public Skill folders, review their SKILL.md source, then import selected skills into the local governance store.</div>
+        </div>
+        ${chip("persistent API store", "cyan")}
+      </div>
+      <div class="import-controls">
+        <label>
+          <span>Public repository</span>
+          <input id="publicSkillRepo" class="field" value="${escapeHtml(state.publicRepoUrl)}" placeholder="https://github.com/anthropics/skills.git" />
+        </label>
+        <div class="import-actions">
+          <button id="loadPublicSkills" class="secondary-action" type="button">Lookup skills</button>
+          <button id="importSelectedSkills" class="primary-action" type="button" ${selectedPublicSkillIds.size ? "" : "disabled"}>Import selected</button>
+          <button id="cancelImportSkills" class="secondary-action" type="button">Close</button>
+        </div>
+      </div>
+      <div class="import-status">${escapeHtml(publicSkillStatus)}</div>
+      <div class="public-skill-list">
+        ${publicSkills.length ? publicSkills.map(renderPublicSkillCard).join("") : '<div class="empty">No public skills loaded yet.</div>'}
+      </div>
+    </section>
+  `;
+}
+
+function renderPublicSkillCard(skill: PublicSkill): string {
+  const importId = publicSkillRegistryId(skill);
+  const alreadyImported = registryObjects.some((item) => item.id === importId);
+  const checked = selectedPublicSkillIds.has(skill.id) ? "checked" : "";
+  return `
+    <label class="public-skill-card">
+      <input type="checkbox" data-public-skill-id="${escapeHtml(skill.id)}" ${checked} />
+      <span>
+        <b>${escapeHtml(skill.name)}</b>
+        <small>${escapeHtml(skill.id)} · ${escapeHtml(skill.license)}${alreadyImported ? " · already imported" : ""}</small>
+        <p>${escapeHtml(skill.description)}</p>
+      </span>
+    </label>
   `;
 }
 
@@ -1069,7 +1132,42 @@ function bindEvents(): void {
     state.notice = "";
     state.formErrors = {};
     state.showRegistration = !state.showRegistration;
+    if (state.showRegistration) state.showImport = false;
     render();
+  });
+
+  document.querySelector<HTMLButtonElement>("#importSkills")?.addEventListener("click", () => {
+    state.notice = "";
+    state.showImport = !state.showImport;
+    if (state.showImport) state.showRegistration = false;
+    render();
+  });
+
+  document.querySelector<HTMLButtonElement>("#cancelImportSkills")?.addEventListener("click", () => {
+    state.showImport = false;
+    render();
+  });
+
+  document.querySelector<HTMLInputElement>("#publicSkillRepo")?.addEventListener("input", (event) => {
+    state.publicRepoUrl = (event.target as HTMLInputElement).value;
+  });
+
+  document.querySelector<HTMLButtonElement>("#loadPublicSkills")?.addEventListener("click", () => {
+    void lookupPublicSkills();
+  });
+
+  document.querySelector<HTMLButtonElement>("#importSelectedSkills")?.addEventListener("click", () => {
+    void importSelectedPublicSkills();
+  });
+
+  document.querySelectorAll<HTMLInputElement>("[data-public-skill-id]").forEach((checkbox) => {
+    checkbox.addEventListener("change", () => {
+      const id = checkbox.dataset.publicSkillId;
+      if (!id) return;
+      if (checkbox.checked) selectedPublicSkillIds.add(id);
+      else selectedPublicSkillIds.delete(id);
+      render();
+    });
   });
 
   document.querySelector<HTMLButtonElement>("#clearDrafts")?.addEventListener("click", () => {
@@ -1263,6 +1361,56 @@ function bindEvents(): void {
 
 function normalizeId(value: string): string {
   return value.trim().toLowerCase().replace(/[^a-z0-9_.-]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function publicSkillRegistryId(skill: PublicSkill): string {
+  const namespace = skill.repo.includes("anthropics/skills") ? "anthropic" : "external";
+  return `public.${namespace}.${normalizeId(skill.id)}`;
+}
+
+async function lookupPublicSkills(): Promise<void> {
+  try {
+    publicSkillStatus = "Looking up public skills...";
+    selectedPublicSkillIds = new Set();
+    render();
+
+    const response = await fetch(`/api/public-skills?repo=${encodeURIComponent(state.publicRepoUrl)}`);
+    if (!response.ok) throw new Error(`Public skill lookup returned ${response.status}`);
+    const payload = await response.json() as { skills?: PublicSkill[] };
+    publicSkills = Array.isArray(payload.skills) ? payload.skills : [];
+    publicSkillStatus = `Found ${publicSkills.length} public skill${publicSkills.length === 1 ? "" : "s"} in ${state.publicRepoUrl}. Select skills to import into the local governance store.`;
+  } catch (error) {
+    publicSkills = [];
+    publicSkillStatus = `Public skill lookup failed. ${error instanceof Error ? error.message : ""}`.trim();
+  }
+  render();
+}
+
+async function importSelectedPublicSkills(): Promise<void> {
+  try {
+    const skillIds = Array.from(selectedPublicSkillIds);
+    publicSkillStatus = `Importing ${skillIds.length} selected skill${skillIds.length === 1 ? "" : "s"}...`;
+    render();
+
+    const response = await fetch("/api/public-skills/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ repo: state.publicRepoUrl, skillIds }),
+    });
+    if (!response.ok) throw new Error(`Public skill import returned ${response.status}`);
+    const payload = await response.json() as { count?: number; imported?: RegistryObject[] };
+    selectedPublicSkillIds = new Set();
+    await loadBackendRegistry();
+    publicSkillStatus = `Imported ${payload.count ?? payload.imported?.length ?? 0} skill${(payload.count ?? 0) === 1 ? "" : "s"} into the local governance store.`;
+    state.type = "skill";
+    state.certification = "all";
+    state.risk = "all";
+    state.query = "public.";
+    state.selectedId = payload.imported?.[0]?.id ?? filtered()[0]?.id ?? state.selectedId;
+  } catch (error) {
+    publicSkillStatus = `Public skill import failed. ${error instanceof Error ? error.message : ""}`.trim();
+  }
+  render();
 }
 
 function splitList(value: string): string[] {
